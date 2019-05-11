@@ -1,0 +1,314 @@
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/tabhost"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.assistant.MainActivity" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+        </TabWidget>
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:id="@+id/id_mainbody"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical">
+
+                <!-- 1.IP 地址和其输入框 -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:text="@string/ip_add"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/id_edt_inputIP"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="0.35"
+                        android:hint="@string/ip"
+                        android:inputType="text"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/id_btn_addIP"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="end"
+                        android:layout_weight="0.2"
+                        android:text="@string/btn_addIP"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/id_btn_ip_deleteIP"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="end"
+                        android:layout_weight="0.2"
+                        android:text="@string/btn_deleteIP"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- 2.端口号和其输入框 -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:text="@string/server_port"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/id_edt_inputport"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="0.25"
+                        android:hint="8080"
+                        android:inputType="number"
+                        android:textSize="14sp" />
+
+                    <Spinner
+                        android:id="@+id/id_slecIP"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5" />
+
+                </LinearLayout>
+                <!-- 3.连接、关闭按钮和其指示灯. -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/id_btn_connClose"
+                        android:layout_width="87dp"
+                        android:layout_height="match_parent"
+                        android:text="连接"
+                        android:textSize="14sp" />
+
+
+                </LinearLayout>
+
+                <ScrollView
+                    android:id="@+id/ScrollView"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
+
+
+                        <EditText
+                            android:id="@+id/id_edt_recshow"
+                            android:layout_width="match_parent"
+                            android:layout_height="150dp"
+                            android:gravity="top"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:hint="接收显示区"
+                            android:scrollbars="vertical"
+                            android:singleLine="false"
+                            android:cursorVisible="true"
+                            android:textCursorDrawable="@null" />
+                    </LinearLayout>
+                </ScrollView>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/id_edt_sendArea"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="4.0"
+                        android:focusable="true"
+                        android:gravity="top"
+                        android:hint="发送区"
+                        android:minLines="3">
+
+                        <requestFocus />
+                    </EditText>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.0"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/id_btn_send"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.0"
+                            android:text="发送" />
+
+                        <Button
+                            android:id="@+id/id_btn_clean"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.0"
+                            android:text="清除" />
+
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/id_btn_comm1"
+                        android:layout_width="85dp"
+                        android:layout_height="match_parent"
+                        android:text="@string/btn_comm1" />
+
+                    <Button
+                        android:id="@+id/id_btn_comm2"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm2" />
+
+                    <Button
+                        android:id="@+id/id_btn_comm3"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm3" />
+
+                    <Button
+                        android:id="@+id/id_btn_comm4"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm4" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/id_btn_comm5"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm5" />
+
+                    <Button
+                        android:id="@+id/id_btn_comm6"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm6" />
+
+                    <Button
+                        android:id="@+id/id_btn_comm7"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm7" />
+
+                    <Button
+                        android:id="@+id/id_btn_comm8"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_comm8" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/id_btn_HDI_1"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_HDI_1" />
+
+                    <Button
+                        android:id="@+id/id_btn_HDI_2"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_HDI_2" />
+
+                    <Button
+                        android:id="@+id/id_btn_HDI_3"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_HDI_3" />
+
+                    <Button
+                        android:id="@+id/id_btn_HDI_4"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_HDI_4" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/id_btn_DI_1"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_DI_1" />
+
+                    <Button
+                        android:id="@+id/id_btn_DI_2"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_DI_2" />
+
+                    <Button
+                        android:id="@+id/id_btn_DI_3"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_DI_3" />
+
+                    <Button
+                        android:id="@+id/id_btn_DI_4"
+                        android:layout_width="85dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_DI_4" />
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</TabHost>
