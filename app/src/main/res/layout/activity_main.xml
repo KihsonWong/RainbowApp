@@ -4,32 +4,42 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gateway_id"
+        android:layout_marginBottom="30dp"
+        android:layout_above="@+id/id_gateway"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:id="@+id/id_gateway"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:hint="@string/id_gateway"
+        android:layout_marginBottom="24dp"
+        android:layout_above="@+id/id_btn_con_gateway"
+        android:layout_centerHorizontal="true"
+        android:textColor="#2F4F4F"
+        android:background="#FFFFFF"/>
+
     <Button
-        android:id="@+id/id_btn_server"
+        android:id="@+id/id_btn_con_gateway"
+        android:layout_width="120dp"
+        android:layout_height="80dp"
+        android:layout_above="@+id/id_btn_gateway_in"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="48dp"
+        android:text="@string/id_btn_con_gateway" />
+
+    <Button
+        android:id="@+id/id_btn_gateway_in"
         android:layout_width="120dp"
         android:layout_height="80dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="134dp"
-        android:text="@string/id_btn_server" />
-
-    <Button
-        android:id="@+id/id_btn_client"
-        android:layout_width="120dp"
-        android:layout_height="80dp"
-        android:layout_above="@+id/id_btn_server"
-        android:layout_alignLeft="@+id/id_btn_server"
-        android:layout_marginBottom="48dp"
-        android:text="@string/id_btn_client" />
-
-    <TextView
-        android:layout_width="140dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/id_btn_client"
-        android:layout_alignLeft="@+id/id_btn_client"
-        android:layout_marginLeft="19dp"
-        android:layout_marginBottom="51dp"
-        android:text="@string/menu"
-        android:textSize="20sp" />
+        android:layout_marginBottom="220dp"
+        android:text="@string/id_btn_gateway_in" />
 
 </RelativeLayout>
