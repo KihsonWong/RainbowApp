@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp">
+
+    <TextView
+        android:id="@+id/gateInId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="22dp"
+        android:text="网关入网界面" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp">
+
+        <TextView
+            android:id="@+id/connectStatusId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:layout_centerVertical="true"
+            android:text="连接网关状态：" />
+
+        <EditText
+            android:id="@+id/hintStatusId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/connectStatusId"
+            android:hint="未连接"
+            android:focusable="false"/>
+
+        <Button
+            android:id="@+id/connectGatewayId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="连接网关"
+            android:layout_centerVertical="true"
+            android:textSize="22sp"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/wifiId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gateInId"
+        android:layout_marginTop="222dp"
+        android:hint="ssid" />
+
+    <EditText
+        android:id="@+id/passwordId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/wifiId"
+        android:hint="password"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/confirmId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/passwordId"
+        android:layout_alignLeft="@id/passwordId"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="18dp"
+        android:text="确认" />
+
+    <Button
+        android:id="@+id/cancelId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/passwordId"
+        android:layout_alignRight="@id/passwordId"
+        android:layout_marginTop="18dp"
+        android:layout_marginRight="100dp"
+        android:text="取消" />
+
+</RelativeLayout>
