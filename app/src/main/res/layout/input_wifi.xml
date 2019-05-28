@@ -14,6 +14,7 @@
         android:text="网关入网界面" />
 
     <RelativeLayout
+        android:id="@+id/statusId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp">
@@ -49,8 +50,8 @@
         android:id="@+id/wifiId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/gateInId"
-        android:layout_marginTop="222dp"
+        android:layout_below="@id/statusId"
+        android:layout_marginTop="113dp"
         android:hint="ssid" />
 
     <EditText

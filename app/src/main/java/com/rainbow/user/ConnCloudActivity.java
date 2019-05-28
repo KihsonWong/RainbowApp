@@ -13,6 +13,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 
 public class ConnCloudActivity extends Activity implements View.OnClickListener {
 
@@ -20,20 +24,47 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     private ListView lv;// 适配器控件------->V视图
     private ArrayAdapter<String> adapter;// 适配器------>C控制器
-    private String[] data = { "我是第1个列表项", "我是第2个列表项", "我是第3个列表项", "我是第4个列表项",
-            "我是第5个列表项", "我是第6个列表项", "我是第7个列表项", "我是第8个列表项", "我是第9个列表项",
-            "我是第10个列表项", "我是第11个列表项"};// 数据源-->M
+    private ArrayList<String> data;// 数据源-->M
 
     private Button btnSearch;
     private Button btnNodeInfo;
     private Button btnDeletNode;
 
+    private boolean searchKey = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.connect_cloud);
 
         init();
+        adapterInit();
+    }
+
+    private void init() {
+
+        btnSearch = findViewById(R.id.searchId);
+        btnNodeInfo = findViewById(R.id.id_btn_nodeInfo);
+        btnDeletNode = findViewById(R.id.id_btn_del_node);
+
+        btnSearch.setOnClickListener(this);
+        btnNodeInfo.setOnClickListener(this);
+        btnDeletNode.setOnClickListener(this);
+    }
+
+    private void adapterInit() {
+        data = new ArrayList<>();
+
+        data.add("");
+        //找到ListView
+        lv = findViewById(R.id.myList);
+        // 实现适配器，利用系统定义的样式，加载数据源
+        adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, data);
+        // R.layout.cell 自己定义视图
+        // android.R.layout.simple_list_item_1 系统定义视图样式
+        // 绑定适配器到适配器控件上
+        lv.setAdapter(adapter);
+
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -57,34 +88,17 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         });
     }
 
-    private void init() {
-        //找到ListView
-        lv = findViewById(R.id.myList);
-        // 实现适配器，利用系统定义的样式，加载数据源
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, data);
-        // R.layout.cell 自己定义视图
-        // android.R.layout.simple_list_item_1 系统定义视图样式
-        // 绑定适配器到适配器控件上
-        lv.setAdapter(adapter);
-
-        btnSearch = findViewById(R.id.searchId);
-        btnNodeInfo = findViewById(R.id.id_btn_nodeInfo);
-        btnDeletNode = findViewById(R.id.id_btn_del_node);
-
-        btnSearch.setOnClickListener(this);
-        btnNodeInfo.setOnClickListener(this);
-        btnDeletNode.setOnClickListener(this);
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.searchId:
-                Log.v(tag, "搜索节点...");
+                searchKey = !searchKey;
+                Log.v(tag, "搜索节点按键");
                 break;
             case R.id.id_btn_nodeInfo:
                 Log.v(tag, "得到节点信息");
+                data.add("11");
+                adapter.notifyDataSetChanged();
                 break;
             case R.id.id_btn_del_node:
                 Log.v(tag, "删除节点");
@@ -100,18 +114,18 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     }
 
     private void returnMainActivity() {
-        ConnCloudThread.isruning = false;
+        ConnThread.isruning = false;
 
         try {
-            ConnCloudThread.mSocket.shutdownInput();
-            ConnCloudThread.mSocket.shutdownOutput();
+            ConnThread.mSocket.shutdownInput();
+            ConnThread.mSocket.shutdownOutput();
         } catch (Exception e){
             e.printStackTrace();
         } finally {
             try {
-                if (ConnCloudThread.mSocket != null) {
-                    ConnCloudThread.mSocket.close();
-                    ConnCloudThread.mSocket = null;
+                if (ConnThread.mSocket != null) {
+                    ConnThread.mSocket.close();
+                    ConnThread.mSocket = null;
                 }
             } catch (Exception e) {
                 e.printStackTrace();

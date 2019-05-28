@@ -27,7 +27,8 @@ public class MainActivity extends Activity {
     private String ip = "192.168.1.107";
     private String port = "6000";
 
-    public static ConnCloudThread connCloudThread = null;
+    public static ConnThread connCloudThread = null;
+    //public static ConnThread connGatewayThread = null;
     public final static int SHOW_INFO_MAINACTIVITY = 0;
     public final static int START_REC_THREAD = 1;
     public final static int START_SEND_THREAD = 2;
@@ -55,7 +56,7 @@ public class MainActivity extends Activity {
                 }
 
                 if (connCloudThread == null) {
-                    connCloudThread = new ConnCloudThread(cli_handler);
+                    connCloudThread = new ConnThread(cli_handler);
 
                     connCloudThread.setSeverIpAddress(ip);
                     connCloudThread.setServerPort(port);
