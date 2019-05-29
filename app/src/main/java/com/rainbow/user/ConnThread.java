@@ -38,7 +38,7 @@ public class ConnThread extends Thread {
     private String ip;                             //IP地址
     private String port;                           //端口号
 
-    private int tempVal;
+    private static int sendBit;
 
     public ConnThread(Handler mhandler) {
         this.mhandler = mhandler;
@@ -110,8 +110,7 @@ public class ConnThread extends Thread {
                             Log.e(tag, recString);
 
                             if (recString.equals(recMsg)) {
-                                Log.e(tag, "111");
-                                sendToGateway(sendGatewayId + MainActivity.edtGateId.getText().toString());
+                                sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
                             }
                         } catch (Exception e) {
                             Log.e(tag, "--->>read failure!" + e.toString());
@@ -136,9 +135,9 @@ public class ConnThread extends Thread {
                 while (isruning) {
                     if (mSocket != null && mSocket.isConnected()) {
                         try {
-                            while (tempVal == 0) ;
+                            while (sendBit == 0) ;
                             Log.v(tag, "send data...");
-                            tempVal = 0;
+                            sendBit = 0;
 //                            String ssid = edtSSID.getText().toString().replaceAll(" ", "");
 //                            String password = edtPsd.getText().toString().replaceAll(" ", "");
 
@@ -164,8 +163,8 @@ public class ConnThread extends Thread {
         sendThread.start();
     }
 
-    private void sendToGateway(String msg) {
+    public static void sendMsg(String msg) {
         sendContext = msg;
-        tempVal = 1;
+        sendBit = 1;
     }
 }

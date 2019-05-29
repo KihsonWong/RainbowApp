@@ -2,6 +2,7 @@ package com.rainbow.user;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ConnCloudActivity extends Activity implements View.OnClickListener {
 
     private String tag = "ConnCloudActivity";
+    private int i = 0;
 
     private ListView lv;// 适配器控件------->V视图
     private ArrayAdapter<String> adapter;// 适配器------>C控制器
@@ -31,6 +33,9 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     private Button btnDeletNode;
 
     private boolean searchKey = false;
+
+    private String msgSearchOn = "SEARCH: Optimal;";
+    private String msgSearchOff= "SEARCH: Close;";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +59,6 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     private void adapterInit() {
         data = new ArrayList<>();
 
-        data.add("");
         //找到ListView
         lv = findViewById(R.id.myList);
         // 实现适配器，利用系统定义的样式，加载数据源
@@ -73,6 +77,12 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 Toast.makeText(ConnCloudActivity.this,
                         "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
                         .show();
+                Log.e(tag, "" + id);
+                //setContentView(R.layout.input_wifi);
+                //setContentView(R.layout.connect_cloud);
+//                Intent intent = new Intent(ConnCloudActivity.this,
+//                        GatewayInActivity.class);
+//                startActivity(intent);
             }
         });
         //处理长时间按下事件：列表项被长时间按下时给出提示信息
@@ -93,21 +103,36 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.searchId:
                 searchKey = !searchKey;
+
+                if (searchKey) {
+                    ConnThread.sendMsg(msgSearchOn);
+                    btnSearch.setText("搜索中");
+                } else {
+                    ConnThread.sendMsg(msgSearchOff);
+                    btnSearch.setText("搜索");
+                }
+
                 Log.v(tag, "搜索节点按键");
                 break;
             case R.id.id_btn_nodeInfo:
                 Log.v(tag, "得到节点信息");
-                data.add("11");
+                data.add("Item" + i++);
                 adapter.notifyDataSetChanged();
                 break;
             case R.id.id_btn_del_node:
                 Log.v(tag, "删除节点");
+                if (data.size() > 2)
+                data.remove(2);
+                adapter.notifyDataSetChanged();
                 break;
             default:
                 break;
         }
     }
 
+    public boolean getSearch() {
+        return searchKey;
+    }
     @Override
     public void onBackPressed() {
         returnMainActivity();

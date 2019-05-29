@@ -2,6 +2,7 @@ package com.rainbow.user;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Button;
 import android.app.Activity;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import static java.lang.System.currentTimeMillis;
 
 public class MainActivity extends Activity {
 
+    private String tag = "MainActivity";
     public static EditText edtGateId = null;
     private long mExitTime;
 
@@ -54,10 +56,10 @@ public class MainActivity extends Activity {
                     showInfo("请先输入网关ID");
                     return;
                 }
-
+                Log.e(tag, "开启连接云线程");
                 if (connCloudThread == null) {
                     connCloudThread = new ConnThread(cli_handler);
-
+                    Log.e(tag, "开启云线程成功");
                     connCloudThread.setSeverIpAddress(ip);
                     connCloudThread.setServerPort(port);
 
