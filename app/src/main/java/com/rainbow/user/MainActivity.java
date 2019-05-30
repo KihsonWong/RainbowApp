@@ -12,8 +12,6 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.net.UnknownHostException;
-
 import static java.lang.System.currentTimeMillis;
 
 

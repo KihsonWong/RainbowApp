@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,10 +76,15 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                Toast.makeText(ConnCloudActivity.this,
-                        "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
-                        .show();
-                Log.e(tag, "" + id);
+                try {
+                    MainActivity.connCloudThread.pckSendMsgToJson();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+//                Toast.makeText(ConnCloudActivity.this,
+//                        "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
+//                        .show();
+//                Log.e(tag, "" + id);
                 //setContentView(R.layout.input_wifi);
                 //setContentView(R.layout.connect_cloud);
 //                Intent intent = new Intent(ConnCloudActivity.this,
@@ -105,10 +112,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 searchKey = !searchKey;
 
                 if (searchKey) {
-                    ConnThread.sendMsg(msgSearchOn);
+                    MainActivity.connCloudThread.sendMsg(msgSearchOn);
                     btnSearch.setText("搜索中");
                 } else {
-                    ConnThread.sendMsg(msgSearchOff);
+                    MainActivity.connCloudThread.sendMsg(msgSearchOff);
                     btnSearch.setText("搜索");
                 }
 
@@ -133,24 +140,24 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     public boolean getSearch() {
         return searchKey;
     }
+
     @Override
     public void onBackPressed() {
         returnMainActivity();
     }
 
     private void returnMainActivity() {
-        ConnThread.isruning = false;
+        MainActivity.connCloudThread.clearIsruning();
 
         try {
-            ConnThread.mSocket.shutdownInput();
-            ConnThread.mSocket.shutdownOutput();
+            MainActivity.connCloudThread.getSocket().shutdownInput();
+            MainActivity.connCloudThread.getSocket().shutdownOutput();
         } catch (Exception e){
             e.printStackTrace();
         } finally {
             try {
-                if (ConnThread.mSocket != null) {
-                    ConnThread.mSocket.close();
-                    ConnThread.mSocket = null;
+                if (MainActivity.connCloudThread.getSocket() != null) {
+                    MainActivity.connCloudThread.clearSocket();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -160,23 +167,23 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         MainActivity.connCloudThread = null;
         finish();
     }
-    /**
-     * 显示提示消息的对话框
-     * @author codingblock 2015-8-11
-     * @param  context     上下文
-     * @param  title       对话框标题
-     * @param  message     对话框提示内容
-     * @return
-     */
-    public AlertDialog.Builder simpleDialog(final Context context, String title, String message){
-        AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setIcon(R.drawable.ic_launcher_foreground)
-                .setMessage(message)
-                .setPositiveButton("完成", null)
-                .setNegativeButton("取消", null);
-        return builder;
-    }
+//    /**
+//     * 显示提示消息的对话框
+//     * @author codingblock 2015-8-11
+//     * @param  context     上下文
+//     * @param  title       对话框标题
+//     * @param  message     对话框提示内容
+//     * @return
+//     */
+//    public AlertDialog.Builder simpleDialog(final Context context, String title, String message){
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+//                .setTitle(title)
+//                .setIcon(R.drawable.ic_launcher_foreground)
+//                .setMessage(message)
+//                .setPositiveButton("完成", null)
+//                .setNegativeButton("取消", null);
+//        return builder;
+//    }
 
 
 

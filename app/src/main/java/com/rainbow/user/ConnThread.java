@@ -5,6 +5,9 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,33 +25,44 @@ public class ConnThread extends Thread {
 
     private static final String tag = "MainActivity";
     private Handler mhandler;
-    public static Socket mSocket;
-    public static boolean isruning;
+    private Socket mSocket;
+    private boolean isruning;
 
-    public final String recMsg = "Who are you?";
+    private final String recMsg = "Who are you?";
     private String sendGatewayId = "I'm client, I want to connect rainbow ";
 
-    Thread recThread;
-    Thread sendThread;
-
-    public static String sendContext = null;
-    public InputStream inputStream;
-    public OutputStream outputStream;
+    private String sendContext = null;
+    private InputStream inputStream;
+    //private OutputStream outputStream;
     private PrintWriter printWriter;
     private String ip;                             //IP地址
     private String port;                           //端口号
 
     private static int sendBit;
 
-    public ConnThread(Handler mhandler) {
+    ConnThread(Handler mhandler) {
         this.mhandler = mhandler;
         isruning = true;
+    }
+
+    Socket getSocket() {
+        return mSocket;
+    }
+
+    void clearSocket() throws IOException {
+        mSocket.close();
+        mSocket = null;
+    }
+
+    void clearIsruning() {
+        isruning = false;
     }
 
     @Override
     public void run() {
         if (mSocket == null) {
             try {
+                OutputStream outputStream;
                 Log.e(tag, "启动连接线程");
                 mSocket = new Socket();
                 SocketAddress socketAddress = new InetSocketAddress(ip,  Integer.parseInt(port));
@@ -78,18 +92,18 @@ public class ConnThread extends Thread {
         }
     }
 
-    public void setSeverIpAddress(String ipAddress) {
+    void setSeverIpAddress(String ipAddress) {
         this.ip = ipAddress;
     }
 
-    public void setServerPort(String port) {
+    void setServerPort(String port) {
         this.port = port;
     }
 
     // 接收数据线程
-    public void receiverData() {
+    void receiverData() {
 
-        recThread = new Thread(new Runnable() {
+        Thread recThread = new Thread(new Runnable() {
             public void run() {
                 while (isruning) {
                     if (mSocket != null && mSocket.isConnected()) {
@@ -103,14 +117,23 @@ public class ConnThread extends Thread {
                             final int len = inputStream.read(buffer);//数据读出来，并且数据的长度
 
                             try {
-                                recString = new String(buffer, 0, len, "UTF-8");
+                                recString = new String(buffer, 0, len, "utf-8");
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
                             Log.e(tag, recString);
 
-                            if (recString.equals(recMsg)) {
-                                sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
+                            //第一步，生成Json字符串格式的JSON对象
+                            JSONObject jsonObject = new JSONObject(recString);
+                            //第二步，从JSON对象中取值如果JSON 对象较多，可以用json数组
+                            String name="姓名："+jsonObject.getString("name");
+                            String age="年龄："+jsonObject.getString("age");
+                            String sex="性别："+jsonObject.getString("sex");
+
+                            if (recString != null) {
+                                if (recString.equals(recMsg)) {
+                                    sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
+                                }
                             }
                         } catch (Exception e) {
                             Log.e(tag, "--->>read failure!" + e.toString());
@@ -129,8 +152,8 @@ public class ConnThread extends Thread {
     }
 
     // 数据发送
-    public void sendData() {
-        sendThread = new Thread(new Runnable() {
+    void sendData() {
+        Thread sendThread = new Thread(new Runnable() {
             public void run() {
                 while (isruning) {
                     if (mSocket != null && mSocket.isConnected()) {
@@ -163,8 +186,18 @@ public class ConnThread extends Thread {
         sendThread.start();
     }
 
-    public static void sendMsg(String msg) {
+    void sendMsg(String msg) {
         sendContext = msg;
         sendBit = 1;
+    }
+
+    void pckSendMsgToJson() throws JSONException {
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put("name", "wyx");
+        jsonObject.put("age", "12");
+        jsonObject.put("sex", "man");
+        final String  result=jsonObject.toString();
+        Log.i("jSON字符串", result);
+        sendMsg(result);
     }
 }
