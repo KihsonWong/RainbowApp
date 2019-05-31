@@ -1,23 +1,18 @@
 package com.rainbow.user;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 
@@ -27,8 +22,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     private int i = 0;
 
     private ListView lv;// 适配器控件------->V视图
-    private ArrayAdapter<String> adapter;// 适配器------>C控制器
-    private ArrayList<String> data;// 数据源-->M
+    private static ArrayAdapter<String> adapter;// 适配器------>C控制器
+    private static ArrayList<String> data;// 数据源-->M
+
+    public static NodeInfo nodeInfo;
 
     private Button btnSearch;
     private Button btnNodeInfo;
@@ -42,9 +39,11 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.connect_cloud);
-
         init();
         adapterInit();
+
+        MainActivity.connCloudThread.receiverThread();
+        MainActivity.connCloudThread.sendThread();
     }
 
     private void init() {
@@ -59,6 +58,8 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     }
 
     private void adapterInit() {
+
+        nodeInfo = new NodeInfo();
         data = new ArrayList<>();
 
         //找到ListView
@@ -76,11 +77,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                try {
-                    MainActivity.connCloudThread.pckSendMsgToJson();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+
 //                Toast.makeText(ConnCloudActivity.this,
 //                        "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
 //                        .show();
@@ -105,6 +102,11 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         });
     }
 
+    public static void updateListView()  {
+        data.add(nodeInfo.getIdcode());
+        adapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -112,11 +114,19 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 searchKey = !searchKey;
 
                 if (searchKey) {
-                    MainActivity.connCloudThread.sendMsg(msgSearchOn);
-                    btnSearch.setText("搜索中");
+                    try {
+                        MainActivity.connCloudThread.pckSearchMsg(ConnThread.Search.OPTIMAL);
+                        btnSearch.setText("搜索中");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 } else {
-                    MainActivity.connCloudThread.sendMsg(msgSearchOff);
-                    btnSearch.setText("搜索");
+                    try {
+                        MainActivity.connCloudThread.pckSearchMsg(ConnThread.Search.CLOSE);
+                        btnSearch.setText("搜索");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 Log.v(tag, "搜索节点按键");
@@ -188,6 +198,53 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
 
 
+    public class NodeInfo {
+        private int node;
+        private int type;
+        private int shownum;
+        private int controlnum;
+        private String idcode;
+
+        public void setNode(int node) {
+            this.node = node;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
+        public void setShownum(int shownum) {
+            this.shownum = shownum;
+        }
+
+        public void setControlnum(int controlnum) {
+            this.controlnum = controlnum;
+        }
+
+        public void setIdcode(String idcode) {
+            this.idcode = idcode;
+        }
+
+        public int getNode() {
+            return node;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public int getShownum() {
+            return shownum;
+        }
+
+        public int getControlnum() {
+            return controlnum;
+        }
+
+        public String getIdcode() {
+            return idcode;
+        }
+    }
 
 
 }

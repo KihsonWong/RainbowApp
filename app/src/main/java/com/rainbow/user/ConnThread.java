@@ -1,5 +1,6 @@
 package com.rainbow.user;
 
+import android.app.Person;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -75,17 +76,16 @@ public class ConnThread extends Thread {
                         new OutputStreamWriter(outputStream,
                                 Charset.forName("UTF-8"))));
 
-                mhandler.sendMessage(mhandler.
-                        obtainMessage(MainActivity.START_REC_THREAD, -1, -1, -1));
-                mhandler.sendMessage(mhandler.
-                        obtainMessage(MainActivity.START_SEND_THREAD, -1, -1, -1));
+//                mhandler.sendMessage(mhandler.
+//                        obtainMessage(MainActivity.START_REC_THREAD, -1, -1, -1));
+//                mhandler.sendMessage(mhandler.
+//                        obtainMessage(MainActivity.START_SEND_THREAD, -1, -1, -1));
                 mhandler.sendMessage(mhandler.
                         obtainMessage(MainActivity.START_NEW_ACTIVITY, -1, -1,-1));
                 mhandler.sendMessage(mhandler.
                         obtainMessage(MainActivity.SHOW_INFO_MAINACTIVITY, 1, -1,-1));
             } catch (IOException e) {
                 e.printStackTrace();
-                MainActivity.connCloudThread = null;
                 mhandler.sendMessage(mhandler.
                         obtainMessage(MainActivity.SHOW_INFO_MAINACTIVITY, 0, -1, -1));
             }
@@ -101,7 +101,7 @@ public class ConnThread extends Thread {
     }
 
     // 接收数据线程
-    void receiverData() {
+    void receiverThread() {
 
         Thread recThread = new Thread(new Runnable() {
             public void run() {
@@ -123,12 +123,13 @@ public class ConnThread extends Thread {
                             }
                             Log.e(tag, recString);
 
-                            //第一步，生成Json字符串格式的JSON对象
-                            JSONObject jsonObject = new JSONObject(recString);
-                            //第二步，从JSON对象中取值如果JSON 对象较多，可以用json数组
-                            String name="姓名："+jsonObject.getString("name");
-                            String age="年龄："+jsonObject.getString("age");
-                            String sex="性别："+jsonObject.getString("sex");
+                            parseMsgAndPerform(recString);
+//                            //第一步，生成Json字符串格式的JSON对象
+//                            JSONObject jsonObject = new JSONObject(recString);
+//                            //第二步，从JSON对象中取值如果JSON 对象较多，可以用json数组
+//                            String name="姓名："+jsonObject.getString("name");
+//                            String age="年龄："+jsonObject.getString("age");
+//                            String sex="性别："+jsonObject.getString("sex");
 
                             if (recString != null) {
                                 if (recString.equals(recMsg)) {
@@ -152,7 +153,7 @@ public class ConnThread extends Thread {
     }
 
     // 数据发送
-    void sendData() {
+    void sendThread() {
         Thread sendThread = new Thread(new Runnable() {
             public void run() {
                 while (isruning) {
@@ -191,13 +192,56 @@ public class ConnThread extends Thread {
         sendBit = 1;
     }
 
-    void pckSendMsgToJson() throws JSONException {
+    enum Search {
+        OPTIMAL, LONGEST, APPOINT, CLOSE
+    }
+
+    void pckSearchMsg(Search  type) throws JSONException {
         JSONObject jsonObject=new JSONObject();
-        jsonObject.put("name", "wyx");
-        jsonObject.put("age", "12");
-        jsonObject.put("sex", "man");
-        final String  result=jsonObject.toString();
+
+        switch (type) {
+            case OPTIMAL:
+                jsonObject.put("class", "search");
+                jsonObject.put("way", "optimal");
+                break;
+            case LONGEST:
+                jsonObject.put("class", "search");
+                jsonObject.put("way", "longest");
+                break;
+            case APPOINT:
+                jsonObject.put("class", "search");
+                jsonObject.put("way", "appoint");
+                jsonObject.put("parent", "???");
+                break;
+            case CLOSE:
+                jsonObject.put("class", "search");
+                jsonObject.put("way", "close");
+                break;
+            default:
+                break;
+        }
+
+        final String result = jsonObject.toString();
         Log.i("jSON字符串", result);
         sendMsg(result);
+    }
+
+    void parseMsgAndPerform(String jsonString) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(jsonString);
+        String reply = jsonObject.getString("reply");
+        Log.e(tag, "parse message");
+        if (reply.equals("OK")) {
+            //
+        } else if (reply.equals("nodeinfo")) {
+            //
+            ConnCloudActivity.nodeInfo.setNode(jsonObject.getInt("node"));
+            ConnCloudActivity.nodeInfo.setType(jsonObject.getInt("type"));
+            ConnCloudActivity.nodeInfo.setShownum(jsonObject.getInt("shownum"));
+            ConnCloudActivity.nodeInfo.setControlnum(jsonObject.getInt("controlnum"));
+            ConnCloudActivity.nodeInfo.setIdcode(jsonObject.getString("idcode"));
+            Log.e(tag, "update list view");
+            ConnCloudActivity.updateListView();
+        }
     }
 }

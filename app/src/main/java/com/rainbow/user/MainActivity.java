@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     private Button btnTest;
 
     //private String ip = "176.122.178.169";                         //IP地址
-    private String ip = "192.168.1.107";
+    private String ip = "192.168.145.1";
     private String port = "6000";
 
     public static ConnThread connCloudThread = null;
@@ -57,11 +57,12 @@ public class MainActivity extends Activity {
                 Log.e(tag, "开启连接云线程");
                 if (connCloudThread == null) {
                     connCloudThread = new ConnThread(cli_handler);
-                    Log.e(tag, "开启云线程成功");
+                    Log.e(tag, "new connCloudThread");
                     connCloudThread.setSeverIpAddress(ip);
                     connCloudThread.setServerPort(port);
-
                     connCloudThread.start();
+                } else {
+                    Log.e(tag, "error");
                 }
             }
         });
@@ -137,10 +138,10 @@ public class MainActivity extends Activity {
                     }
                     break;
                 case START_REC_THREAD:
-                    connCloudThread.receiverData();
+                    connCloudThread.receiverThread();
                     break;
                 case START_SEND_THREAD:
-                    connCloudThread.sendData();
+                    connCloudThread.sendThread();
                     break;
                 case START_NEW_ACTIVITY:
                     Intent intent = new Intent(MainActivity.this,
