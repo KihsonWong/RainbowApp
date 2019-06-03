@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     private Button btnTest;
 
     //private String ip = "176.122.178.169";                         //IP地址
-    private String ip = "192.168.145.1";
+    private String ip = "192.168.1.105";
     private String port = "6000";
 
     public static ConnThread connCloudThread = null;

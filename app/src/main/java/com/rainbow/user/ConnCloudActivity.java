@@ -2,6 +2,8 @@ package com.rainbow.user;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,11 +23,14 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     private String tag = "ConnCloudActivity";
     private int i = 0;
 
+    private final int UPDATE_LISTVIEW = 0;
     private ListView lv;// 适配器控件------->V视图
     private static ArrayAdapter<String> adapter;// 适配器------>C控制器
     private static ArrayList<String> data;// 数据源-->M
 
-    public static NodeInfo nodeInfo;
+    public static boolean updtListFlag = false;
+    private boolean isrunning = false;
+    public static NodeInfo[] nodeInfo;
 
     private Button btnSearch;
     private Button btnNodeInfo;
@@ -42,8 +47,8 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         init();
         adapterInit();
 
-        MainActivity.connCloudThread.receiverThread();
-        MainActivity.connCloudThread.sendThread();
+        UpdateListThread updateListThread = new UpdateListThread(mHandler);
+        updateListThread.start();
     }
 
     private void init() {
@@ -59,9 +64,9 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     private void adapterInit() {
 
-        nodeInfo = new NodeInfo();
+        nodeInfo = new NodeInfo[20];
         data = new ArrayList<>();
-
+        Log.e(tag,"" + nodeInfo.length);
         //找到ListView
         lv = findViewById(R.id.myList);
         // 实现适配器，利用系统定义的样式，加载数据源
@@ -102,8 +107,48 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         });
     }
 
-    public static void updateListView()  {
-        data.add(nodeInfo.getIdcode());
+    class UpdateListThread extends Thread {
+
+        private Handler mHandler;
+
+        public UpdateListThread(Handler mHandler) {
+            this.mHandler = mHandler;
+            isrunning = true;
+        }
+
+        @Override
+        public void run() {
+                while (isrunning) {
+                    while (!updtListFlag);
+                    updtListFlag = false;
+                    Log.e(tag, "send message: update list");
+                    mHandler.sendMessage(mHandler.
+                            obtainMessage(UPDATE_LISTVIEW, -1, -1, -1));
+
+                    try {
+                        Thread.sleep(100L); // 线程休眠
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+        }
+    }
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case UPDATE_LISTVIEW:
+                    Log.e(tag, "update list view");
+                    updateListView();
+                    break;
+            }
+        }
+    };
+
+    public void updateListView()  {
+        data.add(nodeInfo[0].getIdcode());
         adapter.notifyDataSetChanged();
     }
 
@@ -158,6 +203,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     private void returnMainActivity() {
         MainActivity.connCloudThread.clearIsruning();
+        isrunning = false;
 
         try {
             MainActivity.connCloudThread.getSocket().shutdownInput();
@@ -199,6 +245,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
 
     public class NodeInfo {
+
         private int node;
         private int type;
         private int shownum;

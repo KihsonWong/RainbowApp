@@ -76,10 +76,10 @@ public class ConnThread extends Thread {
                         new OutputStreamWriter(outputStream,
                                 Charset.forName("UTF-8"))));
 
-//                mhandler.sendMessage(mhandler.
-//                        obtainMessage(MainActivity.START_REC_THREAD, -1, -1, -1));
-//                mhandler.sendMessage(mhandler.
-//                        obtainMessage(MainActivity.START_SEND_THREAD, -1, -1, -1));
+                mhandler.sendMessage(mhandler.
+                        obtainMessage(MainActivity.START_REC_THREAD, -1, -1, -1));
+                mhandler.sendMessage(mhandler.
+                        obtainMessage(MainActivity.START_SEND_THREAD, -1, -1, -1));
                 mhandler.sendMessage(mhandler.
                         obtainMessage(MainActivity.START_NEW_ACTIVITY, -1, -1,-1));
                 mhandler.sendMessage(mhandler.
@@ -235,13 +235,14 @@ public class ConnThread extends Thread {
             //
         } else if (reply.equals("nodeinfo")) {
             //
-            ConnCloudActivity.nodeInfo.setNode(jsonObject.getInt("node"));
-            ConnCloudActivity.nodeInfo.setType(jsonObject.getInt("type"));
-            ConnCloudActivity.nodeInfo.setShownum(jsonObject.getInt("shownum"));
-            ConnCloudActivity.nodeInfo.setControlnum(jsonObject.getInt("controlnum"));
-            ConnCloudActivity.nodeInfo.setIdcode(jsonObject.getString("idcode"));
-            Log.e(tag, "update list view");
-            ConnCloudActivity.updateListView();
+            for (int i=0;i<ConnCloudActivity.nodeInfo.length;i++);
+            ConnCloudActivity.nodeInfo[0].setNode(jsonObject.getInt("node"));
+            ConnCloudActivity.nodeInfo[0].setType(jsonObject.getInt("type"));
+            ConnCloudActivity.nodeInfo[0].setShownum(jsonObject.getInt("shownum"));
+            ConnCloudActivity.nodeInfo[0].setControlnum(jsonObject.getInt("controlnum"));
+            ConnCloudActivity.nodeInfo[0].setIdcode(jsonObject.getString("idcode"));
+            Log.e(tag, "add new node");
+            ConnCloudActivity.updtListFlag = true;
         }
     }
 }
