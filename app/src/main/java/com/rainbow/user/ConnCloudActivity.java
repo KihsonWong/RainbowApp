@@ -30,6 +30,8 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     public static boolean updtListFlag = false;
     private boolean isrunning = false;
+
+    public static int tab;
     public static NodeInfo[] nodeInfo;
 
     private Button btnSearch;
@@ -86,7 +88,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 //                Toast.makeText(ConnCloudActivity.this,
 //                        "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
 //                        .show();
-//                Log.e(tag, "" + id);
+                Log.e(tag, "id: " + id + "  position: " + position);
                 //setContentView(R.layout.input_wifi);
                 //setContentView(R.layout.connect_cloud);
 //                Intent intent = new Intent(ConnCloudActivity.this,
@@ -102,6 +104,9 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 Toast.makeText(ConnCloudActivity.this,
                         "第" + (position + 1) + "项被长时间按下", Toast.LENGTH_LONG)
                         .show();
+                data.remove(position);
+                adapter.notifyDataSetChanged();
+
                 return true;
             }
         });
@@ -246,11 +251,16 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     public class NodeInfo {
 
+        private int position;
         private int node;
         private int type;
         private int shownum;
         private int controlnum;
         private String idcode;
+
+        public void setPosition(int position) {
+            this.position = position;
+        }
 
         public void setNode(int node) {
             this.node = node;
@@ -270,6 +280,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
         public void setIdcode(String idcode) {
             this.idcode = idcode;
+        }
+
+        public int getPosition() {
+            return position;
         }
 
         public int getNode() {
