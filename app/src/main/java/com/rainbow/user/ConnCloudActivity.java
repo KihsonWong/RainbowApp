@@ -28,17 +28,21 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     private static ArrayAdapter<String> adapter;// 适配器------>C控制器
     private static ArrayList<String> data;// 数据源-->M
 
+    private final int DELETE_ITEM = 0;
+    private final int ADD_ITEM = 1;
+    public static final int NODENUM = 20;
+
     public static boolean updtListFlag = false;
     private boolean isrunning = false;
 
-    public static int tab;
+    public static NodeInfo tempNewNode;
     public static NodeInfo[] nodeInfo;
 
     private Button btnSearch;
     private Button btnNodeInfo;
     private Button btnDeletNode;
 
-    private boolean searchKey = false;
+    public static boolean searchKey = false;
 
     private String msgSearchOn = "SEARCH: Optimal;";
     private String msgSearchOff= "SEARCH: Close;";
@@ -64,9 +68,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         btnDeletNode.setOnClickListener(this);
     }
 
-    private void adapterInit() {
+    public void adapterInit() {
 
-        nodeInfo = new NodeInfo[20];
+        tempNewNode  = new NodeInfo(false);
+        nodeInfo = new NodeInfo[NODENUM];
         data = new ArrayList<>();
         Log.e(tag,"" + nodeInfo.length);
         //找到ListView
@@ -88,7 +93,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 //                Toast.makeText(ConnCloudActivity.this,
 //                        "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
 //                        .show();
+                String da = data.get(position);
+                Log.e(tag, da);
                 Log.e(tag, "id: " + id + "  position: " + position);
+                Log.e(tag, "current list size: " + data.size());
                 //setContentView(R.layout.input_wifi);
                 //setContentView(R.layout.connect_cloud);
 //                Intent intent = new Intent(ConnCloudActivity.this,
@@ -101,12 +109,22 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
                                            int position, long id) {
-                Toast.makeText(ConnCloudActivity.this,
-                        "第" + (position + 1) + "项被长时间按下", Toast.LENGTH_LONG)
-                        .show();
-                data.remove(position);
-                adapter.notifyDataSetChanged();
-
+                showInfo("第" + (position + 1) + "项被长时间按下");
+                //1.给服务器发送删除节点命令
+                String temp = data.get(position);
+                for (int i=0;i<NODENUM;i++) {
+                    if (nodeInfo[i] != null && temp.equals(nodeInfo[i].getIdcode())) {
+                        try {
+                            MainActivity.connCloudThread.pckDeleteMsg(nodeInfo[i].getNode());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                //2.删除视图列表
+                updateListView(DELETE_ITEM, position);
+                //3.删除已存储的节点信息
+                nodeInfoHandler(DELETE_ITEM, position);
                 return true;
             }
         });
@@ -127,15 +145,56 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                     while (!updtListFlag);
                     updtListFlag = false;
                     Log.e(tag, "send message: update list");
+                    //1.视图添加节点
                     mHandler.sendMessage(mHandler.
-                            obtainMessage(UPDATE_LISTVIEW, -1, -1, -1));
-
+                            obtainMessage(UPDATE_LISTVIEW, ADD_ITEM, -1, -1));
+                    //2.存储新的节点信息
+                    nodeInfoHandler(ADD_ITEM, -1);
                     try {
                         Thread.sleep(100L); // 线程休眠
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
+        }
+    }
+    //存储或删除该节点信息
+    public void nodeInfoHandler(int handler, int position) {
+        switch (handler) {
+            case ADD_ITEM:
+                for (int i=0;i<NODENUM;i++) {
+                    if (nodeInfo[i] == null && tempNewNode.isusing) {
+                        nodeInfo[i] = new NodeInfo(true);
+                        nodeInfo[i].setNode(tempNewNode.getNode());
+                        nodeInfo[i].setType(tempNewNode.getType());
+                        nodeInfo[i].setControlnum(tempNewNode.getControlnum());
+                        nodeInfo[i].setShownum(tempNewNode.getShownum());
+                        nodeInfo[i].setIdcode(tempNewNode.getIdcode());
+                        Log.i(tag, "添加节点信息成功");
+
+                        tempNewNode.setIsusing(false);
+                        break;
+                    }
+                }
+                if (i == NODENUM) {
+                    showInfo("节点添加失败");
+                    Log.e(tag, "超出最大节点数量限制");
+                }
+                break;
+            case DELETE_ITEM:
+                String item = data.get(position);
+                for (int i=0;i<NODENUM;i++) {
+                    if (nodeInfo[i] != null && item.equals(nodeInfo[i].getIdcode())) {
+                        nodeInfo[i] = null;
+                        Log.i(tag, "删除节点信息成功");
+                        break;
+                    }
+                }
+                if (i == NODENUM) {
+                    showInfo("节点删除失败");
+                    Log.e(tag, "删除节点信息失败");
+                }
+                break;
         }
     }
 
@@ -146,14 +205,25 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             switch (msg.what) {
                 case UPDATE_LISTVIEW:
                     Log.e(tag, "update list view");
-                    updateListView();
+                    updateListView(msg.arg1, -1);
                     break;
             }
         }
     };
 
-    public void updateListView()  {
-        data.add(nodeInfo[0].getIdcode());
+
+    public void updateListView(int handler, int position)  {
+        switch (handler) {
+            case DELETE_ITEM:
+//                if (position == data.size() - 1){}
+//
+//                else
+                data.remove(position);
+                break;
+            case ADD_ITEM:
+                data.add(tempNewNode.getIdcode());
+                break;
+        }
         adapter.notifyDataSetChanged();
     }
 
@@ -182,9 +252,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 Log.v(tag, "搜索节点按键");
                 break;
             case R.id.id_btn_nodeInfo:
-                Log.v(tag, "得到节点信息");
-                data.add("Item" + i++);
-                adapter.notifyDataSetChanged();
+                Log.v(tag, "得到节点信息" + data.size());
+
+//                data.add("Item" + i++);
+//                adapter.notifyDataSetChanged();
                 break;
             case R.id.id_btn_del_node:
                 Log.v(tag, "删除节点");
@@ -195,10 +266,6 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             default:
                 break;
         }
-    }
-
-    public boolean getSearch() {
-        return searchKey;
     }
 
     @Override
@@ -246,20 +313,26 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 //        return builder;
 //    }
 
-
+    private void showInfo(String msg) {
+        Toast.makeText(ConnCloudActivity.this, msg, Toast.LENGTH_SHORT).show();
+    }
 
 
     public class NodeInfo {
 
-        private int position;
+        private boolean isusing;
         private int node;
         private int type;
         private int shownum;
         private int controlnum;
         private String idcode;
 
-        public void setPosition(int position) {
-            this.position = position;
+        public NodeInfo(boolean isusing) {
+            this.isusing = isusing;
+        }
+
+        public void setIsusing(boolean isusing) {
+            this.isusing = isusing;
         }
 
         public void setNode(int node) {
@@ -282,8 +355,8 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             this.idcode = idcode;
         }
 
-        public int getPosition() {
-            return position;
+        public boolean getIsusing() {
+            return isusing;
         }
 
         public int getNode() {

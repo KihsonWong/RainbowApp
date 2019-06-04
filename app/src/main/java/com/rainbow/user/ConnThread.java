@@ -123,7 +123,6 @@ public class ConnThread extends Thread {
                             }
                             Log.e(tag, recString);
 
-                            parseMsgAndPerform(recString);
 //                            //第一步，生成Json字符串格式的JSON对象
 //                            JSONObject jsonObject = new JSONObject(recString);
 //                            //第二步，从JSON对象中取值如果JSON 对象较多，可以用json数组
@@ -134,6 +133,8 @@ public class ConnThread extends Thread {
                             if (recString != null) {
                                 if (recString.equals(recMsg)) {
                                     sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
+                                } else {
+                                    parseMsgAndPerform(recString);
                                 }
                             }
                         } catch (Exception e) {
@@ -187,7 +188,7 @@ public class ConnThread extends Thread {
         sendThread.start();
     }
 
-    void sendMsg(String msg) {
+    private void sendMsg(String msg) {
         sendContext = msg;
         sendBit = 1;
     }
@@ -197,7 +198,7 @@ public class ConnThread extends Thread {
     }
 
     void pckSearchMsg(Search  type) throws JSONException {
-        JSONObject jsonObject=new JSONObject();
+        JSONObject jsonObject = new JSONObject();
 
         switch (type) {
             case OPTIMAL:
@@ -222,7 +223,18 @@ public class ConnThread extends Thread {
         }
 
         final String result = jsonObject.toString();
-        Log.i("jSON字符串", result);
+        Log.i("jSON字符串：", result);
+        sendMsg(result);
+    }
+
+    void pckDeleteMsg(int node) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("class", "delete");
+        jsonObject.put("node", node);
+
+        final String result = jsonObject.toString();
+        Log.i("jSON字符串：", result);
         sendMsg(result);
     }
 
@@ -233,16 +245,21 @@ public class ConnThread extends Thread {
         Log.e(tag, "parse message");
         if (reply.equals("OK")) {
             //
-        } else if (reply.equals("nodeinfo")) {
+        } else if (reply.equals("nodeinfo") && ConnCloudActivity.searchKey) {
             //
-            for (int i=0;i<ConnCloudActivity.nodeInfo.length;i++);
-            ConnCloudActivity.nodeInfo[0].setNode(jsonObject.getInt("node"));
-            ConnCloudActivity.nodeInfo[0].setType(jsonObject.getInt("type"));
-            ConnCloudActivity.nodeInfo[0].setShownum(jsonObject.getInt("shownum"));
-            ConnCloudActivity.nodeInfo[0].setControlnum(jsonObject.getInt("controlnum"));
-            ConnCloudActivity.nodeInfo[0].setIdcode(jsonObject.getString("idcode"));
-            Log.e(tag, "add new node");
-            ConnCloudActivity.updtListFlag = true;
+            if (!ConnCloudActivity.tempNewNode.getIsusing()) {
+                ConnCloudActivity.tempNewNode.setIsusing(true);
+                ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
+                ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
+                ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
+                ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
+                ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
+
+                Log.i(tag, "add new node");
+                ConnCloudActivity.updtListFlag = true;
+            } else {
+                Log.e(tag, "add new node fail");
+            }
         }
     }
 }
