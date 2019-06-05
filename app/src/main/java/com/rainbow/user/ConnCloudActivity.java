@@ -73,7 +73,6 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         tempNewNode  = new NodeInfo(false);
         nodeInfo = new NodeInfo[NODENUM];
         data = new ArrayList<>();
-        Log.e(tag,"" + nodeInfo.length);
         //找到ListView
         lv = findViewById(R.id.myList);
         // 实现适配器，利用系统定义的样式，加载数据源
@@ -116,13 +115,19 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                     if (nodeInfo[i] != null && temp.equals(nodeInfo[i].getIdcode())) {
                         try {
                             MainActivity.connCloudThread.pckDeleteMsg(nodeInfo[i].getNode());
+                            break;
                         } catch (JSONException e) {
+                            Log.e(tag, "发送删除节点信息失败");
+                            showInfo("删除节点失败");
                             e.printStackTrace();
+                            return false;
                         }
                     }
                 }
                 //2.删除视图列表
-                updateListView(DELETE_ITEM, position);
+                //updateListView(DELETE_ITEM, position);
+                mHandler.sendMessage(mHandler. //由于添加是通过消息队列，因此删除也必须在通过这种方式，否则size会出错。
+                        obtainMessage(UPDATE_LISTVIEW, DELETE_ITEM, position, -1));
                 //3.删除已存储的节点信息
                 nodeInfoHandler(DELETE_ITEM, position);
                 return true;
@@ -204,8 +209,8 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             super.handleMessage(msg);
             switch (msg.what) {
                 case UPDATE_LISTVIEW:
-                    Log.e(tag, "update list view");
-                    updateListView(msg.arg1, -1);
+                    Log.i(tag, "update list view: " + msg.arg1);
+                    updateListView(msg.arg1, msg.arg2);
                     break;
             }
         }
@@ -218,6 +223,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 //                if (position == data.size() - 1){}
 //
 //                else
+                Log.e(tag, "pos: " + position + " :" + i++ + " data.size: " + data.size());
                 data.remove(position);
                 break;
             case ADD_ITEM:
