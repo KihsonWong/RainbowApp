@@ -27,6 +27,7 @@
         <activity
             android:name=".GatewayInActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged|adjustPan" />
+        <activity android:name=".ControlNodeActivity" />
     </application>
 
 </manifest>

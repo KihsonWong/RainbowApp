@@ -1,6 +1,7 @@
 package com.rainbow.user;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -265,9 +266,9 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.id_btn_del_node:
                 Log.v(tag, "删除节点");
-                if (data.size() > 2)
-                data.remove(2);
-                adapter.notifyDataSetChanged();
+                Intent intent = new Intent(ConnCloudActivity.this,
+                        ControlNodeActivity.class);
+                startActivity(intent);
                 break;
             default:
                 break;
