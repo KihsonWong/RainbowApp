@@ -209,10 +209,10 @@ public class ControlNodeActivity extends Activity {
         //text_node.setText(ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getIdcode());
         list = new ArrayList<Map<String, Object>>();
 
-        for (int i=0;i<ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getControlnum();i++) {
+        for (int i=0;i<ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getShownum();i++) {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("button", "commad" + i);
-            map.put("string", "text" + i);
+            map.put("button", "      ");
+            map.put("string", "      ");
             list.add(map);
         }
 

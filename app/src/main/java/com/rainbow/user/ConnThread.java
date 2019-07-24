@@ -111,7 +111,8 @@ public class ConnThread extends Thread {
                             while (inputStream.available() == 0) {
                             }
                             String recString = null;
-                            final byte[] buffer = new byte[1024];//创建接收缓冲区
+                            String []tempString;
+                            final byte[] buffer = new byte[1024 * 10];//创建接收缓冲区
 
                             Log.i(tag, "---->>client receive....");
                             final int len = inputStream.read(buffer);//数据读出来，并且数据的长度
@@ -121,7 +122,18 @@ public class ConnThread extends Thread {
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
-                            Log.e(tag, recString);
+                            assert recString != null;
+                            if (recString.equals(recMsg)) {
+                                sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
+                                continue;
+                            }
+
+                            tempString = recString.split("\r\n");
+                            for (String s : tempString) {
+                                Log.e(tag, s);
+                                parseMsgAndPerform(s);
+                                while (ConnCloudActivity.tempNewNode.getIsusing());
+                            }
 
 //                            //第一步，生成Json字符串格式的JSON对象
 //                            JSONObject jsonObject = new JSONObject(recString);
@@ -130,13 +142,6 @@ public class ConnThread extends Thread {
 //                            String age="年龄："+jsonObject.getString("age");
 //                            String sex="性别："+jsonObject.getString("sex");
 
-                            if (recString != null) {
-                                if (recString.equals(recMsg)) {
-                                    sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
-                                } else {
-                                    parseMsgAndPerform(recString);
-                                }
-                            }
                         } catch (Exception e) {
                             Log.e(tag, "--->>read failure!" + e.toString());
                         }
@@ -278,7 +283,7 @@ public class ConnThread extends Thread {
         if (jsonObject.has("reply")) {
             String reply = jsonObject.getString("reply");
             if (reply.equals("OK")) {
-                //
+                Log.e(tag, "reply OK");
             } else if (reply.equals("nodeinfo")) {
                 //
                 if (!ConnCloudActivity.tempNewNode.getIsusing()) {
@@ -295,7 +300,7 @@ public class ConnThread extends Thread {
                     Log.e(tag, "add new node fail");
                 }
             }
-        } else if (jsonObject.has("class")){} {
+        } else if (jsonObject.has("class")) {
             String rev = jsonObject.getString("class");
             String object = jsonObject.getString("object");
             if (rev.equals("newnode") && object.equals("netin") && ConnCloudActivity.searchKey) {

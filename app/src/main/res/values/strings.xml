@@ -9,6 +9,7 @@
     <string name="id_btn_server">TCP Server</string>
     <string name="gateway_id">\网关ID</string>
     <string name="id_gateway">空</string>
+    <string name="btn_comm"> </string>
     <string name="ip_add">服务器IP地址:</string>
     <string name="socket_address">地址列表:</string>
     <string name="ip">192.168.0.104</string>
