@@ -46,8 +46,8 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
     private Context mContext = null;
     private MyHandler myHandler = null;
 
-    private String rainbowIP = "192.168.1.101";
-    private String rainbowPort = "6000";
+    private String rainbowIP = "192.168.4.1";
+    private String rainbowPort = "1013";
     private Socket mSocket = null;
     private OutputStream outputStream = null;
     private InputStream inputDatas = null;
@@ -284,7 +284,7 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
                                 myHandler.sendMessage(myHandler.
                                         obtainMessage(SENDFAINMESSAGE, -1, -1, -1));
                             } else {
-                                String context = "ssid: " + ssid + " password: " + password;
+                                String context = "ssid: " + ssid + " password: " + password + " end";
                                 printWriter.print(context);
                                 printWriter.flush();
                                 Log.i(tag, "--->> client send data!");

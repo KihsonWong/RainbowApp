@@ -523,7 +523,7 @@ public class ClientActivity extends Activity implements OnClickListener {
                     String result = null;
                     byte[] buffer = (byte[]) msg.obj;
                     try {
-                        result = new String(buffer, 0, msg.arg1, "GBK");
+                        result = new String(buffer, 0, msg.arg1, "GB2312");
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }

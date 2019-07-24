@@ -30,7 +30,7 @@ public class ConnThread extends Thread {
     private boolean isruning;
 
     private final String recMsg = "Who are you?";
-    private String sendGatewayId = "I'm client, I want to connect rainbow ";
+    private String sendGatewayId = "I'm client, I want to connect ";
 
     private String sendContext = null;
     private InputStream inputStream;
@@ -74,7 +74,7 @@ public class ConnThread extends Thread {
 
                 printWriter = new PrintWriter(new BufferedWriter(   //转成UTF-8编码输出
                         new OutputStreamWriter(outputStream,
-                                Charset.forName("UTF-8"))));
+                                Charset.forName("gb2312"))));
 
                 mhandler.sendMessage(mhandler.
                         obtainMessage(MainActivity.START_REC_THREAD, -1, -1, -1));
@@ -117,7 +117,7 @@ public class ConnThread extends Thread {
                             final int len = inputStream.read(buffer);//数据读出来，并且数据的长度
 
                             try {
-                                recString = new String(buffer, 0, len, "utf-8");
+                                recString = new String(buffer, 0, len, "gb2312");
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
@@ -196,7 +196,7 @@ public class ConnThread extends Thread {
     enum Search {
         OPTIMAL, LONGEST, APPOINT, CLOSE
     }
-
+    //JSon打包及发送消息
     void pckSearchMsg(Search  type) throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -238,27 +238,92 @@ public class ConnThread extends Thread {
         sendMsg(result);
     }
 
+    void pckCommandMsg(int node, int window, int value, String obj) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("class", "control");
+        jsonObject.put("node", node);
+        jsonObject.put("window", window);
+        jsonObject.put("value", value);
+        jsonObject.put("object", obj);
+
+        final String result = jsonObject.toString();
+        Log.i("jSON字符串：", result);
+        sendMsg(result);
+    }
+
+    void  pckCommandNodeInfo(int node) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("class", "nodeinfo");
+        if (node == -1)
+            jsonObject.put("node", "all");
+        else
+            jsonObject.put("node", node);
+        jsonObject.put("object", "inquire");
+
+        final String result = jsonObject.toString();
+        Log.i("jSON字符串：", result);
+        sendMsg(result);
+    }
+    //接受消息并解析执行
     void parseMsgAndPerform(String jsonString) throws JSONException {
 
         JSONObject jsonObject = new JSONObject(jsonString);
-        String reply = jsonObject.getString("reply");
-        Log.e(tag, "parse message");
-        if (reply.equals("OK")) {
-            //
-        } else if (reply.equals("nodeinfo") && ConnCloudActivity.searchKey) {
-            //
-            if (!ConnCloudActivity.tempNewNode.getIsusing()) {
-                ConnCloudActivity.tempNewNode.setIsusing(true);
-                ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
-                ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
-                ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
-                ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
-                ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
+        //String reply = jsonObject.getString("reply");
+        //String rev = jsonObject.getString("class");
 
-                Log.i(tag, "add new node");
-                ConnCloudActivity.updtListFlag = true;
-            } else {
-                Log.e(tag, "add new node fail");
+        Log.e(tag, "parse message");
+
+        if (jsonObject.has("reply")) {
+            String reply = jsonObject.getString("reply");
+            if (reply.equals("OK")) {
+                //
+            } else if (reply.equals("nodeinfo")) {
+                //
+                if (!ConnCloudActivity.tempNewNode.getIsusing()) {
+                    ConnCloudActivity.tempNewNode.setIsusing(true);
+                    ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
+                    ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
+                    ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
+                    ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
+                    ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
+
+                    Log.i(tag, "add new node");
+                    ConnCloudActivity.updtListFlag = true;
+                } else {
+                    Log.e(tag, "add new node fail");
+                }
+            }
+        } else if (jsonObject.has("class")){} {
+            String rev = jsonObject.getString("class");
+            String object = jsonObject.getString("object");
+            if (rev.equals("newnode") && object.equals("netin") && ConnCloudActivity.searchKey) {
+                if (!ConnCloudActivity.tempNewNode.getIsusing()) {
+                    ConnCloudActivity.tempNewNode.setIsusing(true);
+                    ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
+                    ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
+                    ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
+                    ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
+                    ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
+
+                    Log.i(tag, "add new node");
+                    ConnCloudActivity.updtListFlag = true;
+                } else {
+                    Log.e(tag, "add new node fail");
+                }
+            } else if (rev.equals("remark")  && object.equals("control")) {
+                ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                Log.i(tag, "update sublistview");
+                ControlNodeActivity.updtSubListCmdFlag = true;
+            } else if (rev.equals("show")  && object.equals("string")) {
+                ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                Log.i(tag, "update sublistview");
+                ControlNodeActivity.updtSubListShowFlag = true;
             }
         }
     }

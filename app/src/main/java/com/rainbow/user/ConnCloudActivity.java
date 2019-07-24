@@ -38,6 +38,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     public static NodeInfo tempNewNode;
     public static NodeInfo[] nodeInfo;
+    public static int temp_index;
 
     private Button btnSearch;
     private Button btnNodeInfo;
@@ -89,21 +90,24 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-
-//                Toast.makeText(ConnCloudActivity.this,
-//                        "第" + (position + 1) + "项被单击按下", Toast.LENGTH_LONG)
-//                        .show();
-                String da = data.get(position);
-                Log.e(tag, da);
-                Log.e(tag, "id: " + id + "  position: " + position);
-                Log.e(tag, "current list size: " + data.size());
-                //setContentView(R.layout.input_wifi);
-                //setContentView(R.layout.connect_cloud);
-//                Intent intent = new Intent(ConnCloudActivity.this,
-//                        GatewayInActivity.class);
-//                startActivity(intent);
+            int i;
+            String item = data.get(position);
+            for (i=0;i<NODENUM;i++) {
+                if (nodeInfo[i] != null && item.equals(nodeInfo[i].getIdcode())) {
+                    Log.i(tag, "得到i值：" + i);
+                    break;
+                }
+            }
+            if (i == NODENUM) {
+                Log.e(tag, "得到i值失败");
+            }
+            temp_index = i;
+            Intent intent = new Intent(ConnCloudActivity.this,
+                    ControlNodeActivity.class);
+            startActivity(intent);
             }
         });
+
         //处理长时间按下事件：列表项被长时间按下时给出提示信息
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -260,15 +264,16 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.id_btn_nodeInfo:
                 Log.v(tag, "得到节点信息" + data.size());
-
+                try {
+                    MainActivity.connCloudThread.pckCommandNodeInfo(-1);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 //                data.add("Item" + i++);
 //                adapter.notifyDataSetChanged();
                 break;
             case R.id.id_btn_del_node:
                 Log.v(tag, "删除节点");
-                Intent intent = new Intent(ConnCloudActivity.this,
-                        ControlNodeActivity.class);
-                startActivity(intent);
                 break;
             default:
                 break;
