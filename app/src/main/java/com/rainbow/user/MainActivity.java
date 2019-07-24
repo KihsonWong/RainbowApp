@@ -12,6 +12,8 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
+
 import static java.lang.System.currentTimeMillis;
 
 
@@ -117,6 +119,63 @@ public class MainActivity extends Activity {
     }
 
     //客户端通信模式下
+    private static class cli_handler extends Handler {
+        //持有弱引用MainActivity,GC回收时会被回收掉.
+        private final WeakReference<MainActivity> mAct;
+
+        public cli_handler(MainActivity mainActivity){
+            mAct =new WeakReference<MainActivity>(mainActivity);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            MainActivity mainAct=mAct.get();
+            super.handleMessage(msg);
+            if(mainAct!=null){
+                switch (msg.what) {
+                    case SHOW_INFO_MAINACTIVITY:
+                        switch (msg.arg1) {
+                            case 0:
+                                showInfo("连接服务器失败");
+                                connCloudThread = null;
+                                break;
+                            case 1:
+                                showInfo("连接服务器成功");
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case START_REC_THREAD:
+                        connCloudThread.receiverThread();
+                        break;
+                    case START_SEND_THREAD:
+                        connCloudThread.sendThread();
+                        break;
+                    case START_NEW_ACTIVITY:
+                        Intent intent = new Intent(MainActivity.this,
+                                ConnCloudActivity.class);
+                        startActivity(intent);
+                        break;
+                    case CLIENT_STATE_ERROR:
+                        showInfo("连接异常");
+                        break;
+                    case CLIENT_STATE_IOFO:
+
+                        break;
+                    //接收数据
+                    case CLIENT_STATE_CORRECT_READ:
+                        //Handler_receive(msg);
+                        break;
+                    //发送数据
+                    case CLIENT_STATE_CORRECT_WRITE:
+
+                        break;
+                }//执行业务逻辑
+            }
+        }
+    }
     private Handler cli_handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -167,7 +226,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    private void showInfo(String msg) {
+    private static void showInfo(String msg) {
         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
     }
 }

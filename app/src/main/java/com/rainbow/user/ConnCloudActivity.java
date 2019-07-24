@@ -21,16 +21,16 @@ import java.util.ArrayList;
 
 public class ConnCloudActivity extends Activity implements View.OnClickListener {
 
-    private String tag = "ConnCloudActivity";
-    private int i = 0;
+    private static String tag = "ConnCloudActivity";
+    private static int i = 0;
 
-    private final int UPDATE_LISTVIEW = 0;
-    private ListView lv;// 适配器控件------->V视图
+    private static final int UPDATE_LISTVIEW = 0;
+    ListView lv;// 适配器控件------->V视图
     private static ArrayAdapter<String> adapter;// 适配器------>C控制器
     private static ArrayList<String> data;// 数据源-->M
 
-    private final int DELETE_ITEM = 0;
-    private final int ADD_ITEM = 1;
+    private static final int DELETE_ITEM = 0;
+    private static final int ADD_ITEM = 1;
     public static final int NODENUM = 20;
 
     public static boolean updtListFlag = false;
@@ -41,13 +41,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     public static int temp_index;
 
     private Button btnSearch;
-    private Button btnNodeInfo;
-    private Button btnDeletNode;
+    Button btnNodeInfo;
+    Button btnDeletNode;
 
     public static boolean searchKey = false;
-
-    private String msgSearchOn = "SEARCH: Optimal;";
-    private String msgSearchOff= "SEARCH: Close;";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +75,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         //找到ListView
         lv = findViewById(R.id.myList);
         // 实现适配器，利用系统定义的样式，加载数据源
-        adapter = new ArrayAdapter<String>(this,
+        adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, data);
         // R.layout.cell 自己定义视图
         // android.R.layout.simple_list_item_1 系统定义视图样式
@@ -144,7 +141,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
         private Handler mHandler;
 
-        public UpdateListThread(Handler mHandler) {
+        private UpdateListThread(Handler mHandler) {
             this.mHandler = mHandler;
             isrunning = true;
         }
@@ -152,14 +149,16 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         @Override
         public void run() {
                 while (isrunning) {
-                    while (!updtListFlag);
-                    updtListFlag = false;
-                    Log.e(tag, "send message: update list");
-                    //1.视图添加节点
-                    mHandler.sendMessage(mHandler.
-                            obtainMessage(UPDATE_LISTVIEW, ADD_ITEM, -1, -1));
-                    //2.存储新的节点信息
-                    nodeInfoHandler(ADD_ITEM, -1);
+                    if (updtListFlag) {
+                        updtListFlag = false;
+                        Log.e(tag, "send message: update list");
+                        //1.视图添加节点
+                        mHandler.sendMessage(mHandler.
+                                obtainMessage(UPDATE_LISTVIEW, ADD_ITEM, -1, -1));
+                        //2.存储新的节点信息
+                        nodeInfoHandler(ADD_ITEM, -1);
+                    }
+
                     try {
                         Thread.sleep(100L); // 线程休眠
                     } catch (InterruptedException e) {
@@ -208,13 +207,13 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         }
     }
 
-    private Handler mHandler = new Handler() {
+    final static Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
                 case UPDATE_LISTVIEW:
-                    Log.i(tag, "update list view: " + msg.arg1);
+                    //Log.i(tag, "update list view: " + msg.arg1);
                     updateListView(msg.arg1, msg.arg2);
                     break;
             }
@@ -222,7 +221,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     };
 
 
-    public void updateListView(int handler, int position)  {
+    public static void updateListView(int handler, int position)  {
         switch (handler) {
             case DELETE_ITEM:
 //                if (position == data.size() - 1){}
