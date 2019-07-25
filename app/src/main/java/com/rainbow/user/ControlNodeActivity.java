@@ -45,7 +45,7 @@ public class ControlNodeActivity extends Activity {
 
         ListView listView = findViewById(R.id.list);
 
-        tempCtlRemark = new CtlRemark();
+        tempCtlRemark = new CtlRemark(false);
 
         //text_node = findViewById(R.id.id_txt_node);
 
@@ -59,10 +59,18 @@ public class ControlNodeActivity extends Activity {
 
     public class CtlRemark {
 
-        //private boolean isusing;
+        private boolean isusing;
         private int node;
         private int window;
         private String content;
+
+        CtlRemark(boolean isusing) {
+            this.isusing = isusing;
+        }
+
+        boolean getIsusing() {
+            return isusing;
+        }
 
         int getNode() {
             return node;
@@ -74,6 +82,10 @@ public class ControlNodeActivity extends Activity {
 
         String getContent() {
             return content;
+        }
+
+        void setIsusing(boolean isusing) {
+            this.isusing = isusing;
         }
 
         void setNode(int node) {
@@ -103,18 +115,20 @@ public class ControlNodeActivity extends Activity {
             while (isrunning) {
                 if (updtSubListCmdFlag)  {
                     updtSubListCmdFlag = false;
+                    Log.v(tag, "updtSubListCmdFlag");
                     //1.视图添加节点
                     mHandler.sendMessage(mHandler.
                             obtainMessage(UPDATE_SUB_LISTVIEW, 0, -1, -1));
                 }
                 else if (updtSubListShowFlag){
                     updtSubListShowFlag = false;
+                    Log.v(tag, "updtSubListShowFlag");
                     //1.视图添加节点
                     mHandler.sendMessage(mHandler.
                             obtainMessage(UPDATE_SUB_LISTVIEW, 1, -1, -1));
                 }
                 try {
-                    Thread.sleep(200L); // 线程休眠
+                    Thread.sleep(10L); // 线程休眠
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -128,15 +142,26 @@ public class ControlNodeActivity extends Activity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case UPDATE_SUB_LISTVIEW:
-                    Log.i(tag, "update list view: " + msg.arg1);
-                    Map<String, Object> map = list.get(tempCtlRemark.getWindow());
-                    if (msg.arg1 == 0) {
-                        map.put("button", tempCtlRemark.getContent());
-                    } else if (msg.arg1 == 1) {
-                        Log.i(tag, "tem: " + ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode() + " sdf" + tempCtlRemark.getNode());
-                        if (ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode() == tempCtlRemark.getNode())
-                            map.put("string", tempCtlRemark.getContent());
+                    if (ControlNodeActivity.tempCtlRemark.getIsusing()) {
+                        Log.i(tag, "update list view: " + msg.arg1);
+                        Map<String, Object> map = list.get(tempCtlRemark.getWindow());
+                        if (msg.arg1 == 0) {
+                            map.put("button", tempCtlRemark.getContent());
+                            Log.i(tag, "put button");
+                        } else if (msg.arg1 == 1) {
+                            if (ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode() == tempCtlRemark.getNode()) {
+                                Log.i(tag, "put string");
+                                map.put("string", tempCtlRemark.getContent());
+                            }
+                            Log.i(tag, "put string...");
+                        }
+                        ControlNodeActivity.tempCtlRemark.setIsusing(false);
+                    } else {
+                        Log.e(tag, "update list view fail");
                     }
+                    break;
+                default:
+                    Log.e(tag, "error");
                     break;
             }
             adapter.notifyDataSetChanged();

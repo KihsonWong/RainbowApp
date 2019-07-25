@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 
 public class ConnThread extends Thread {
 
-    private static final String tag = "MainActivity";
+    private static final String tag = "ConnThread";
     private Handler mhandler;
     private Socket mSocket;
     private boolean isruning;
@@ -123,28 +123,34 @@ public class ConnThread extends Thread {
                                 e.printStackTrace();
                             }
                             assert recString != null;
-                            Log.v(tag, "msg: " + recString);
+
                             switch (recString) {
                                 case recMsg:
                                     sendMsg(sendGatewayId + id);
+                                    Log.v(tag, "msg: " + recString);
                                     continue;
                                 case recMsg1:
                                     mhandler.sendMessage(mhandler.
                                             obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 0, -1, -1));
+                                    Log.v(tag, "msg: " + recString);
                                     continue;
                                 case recMsg2:
                                     mhandler.sendMessage(mhandler.
                                             obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 1, -1, -1));
                                     mhandler.sendMessage(mhandler.
                                             obtainMessage(MainActivity.START_NEW_ACTIVITY, -1, -1, -1));
+                                    Log.v(tag, "msg: " + recString);
                                     continue;
                             }
 
                             tempString = recString.split("\r\n");
                             for (String s : tempString) {
-                                Log.e(tag, s);
+                                Log.v(tag, s);
                                 parseMsgAndPerform(s);
                                 while (ConnCloudActivity.tempNewNode.getIsusing());
+                                if (ControlNodeActivity.tempCtlRemark != null) {
+                                    while (ControlNodeActivity.tempCtlRemark.getIsusing());
+                                }
                             }
 
 //                            //第一步，生成Json字符串格式的JSON对象
@@ -156,7 +162,6 @@ public class ConnThread extends Thread {
 
                         } catch (Exception e) {
                             Log.e(tag, "--->>read failure!" + e.toString());
-
                         }
                     }
                     try {
@@ -284,12 +289,12 @@ public class ConnThread extends Thread {
         //String reply = jsonObject.getString("reply");
         //String rev = jsonObject.getString("class");
 
-        Log.e(tag, "parse message");
+        Log.v(tag, "parse message");
 
         if (jsonObject.has("reply")) {
             String reply = jsonObject.getString("reply");
             if (reply.equals("OK")) {
-                Log.e(tag, "reply OK");
+                Log.v(tag, "reply OK");
             } else if (reply.equals("nodeinfo")) {
                 //
                 if (!ConnCloudActivity.tempNewNode.getIsusing()) {
@@ -300,7 +305,7 @@ public class ConnThread extends Thread {
                     ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
                     ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
 
-                    Log.i(tag, "add new node");
+                    Log.i(tag, "lookup nodes info");
                     ConnCloudActivity.updtListFlag = true;
                 } else {
                     Log.e(tag, "add new node fail");
@@ -324,17 +329,27 @@ public class ConnThread extends Thread {
                     Log.e(tag, "add new node fail");
                 }
             } else if (rev.equals("remark")  && object.equals("control")) {
-                ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
-                ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
-                ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
-                Log.i(tag, "update sublistview");
-                ControlNodeActivity.updtSubListCmdFlag = true;
+                if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
+                    ControlNodeActivity.tempCtlRemark.setIsusing(true);
+                    ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                    ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                    ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                    Log.i(tag, "update cmd sublistview");
+                    ControlNodeActivity.updtSubListCmdFlag = true;
+                } else {
+                    Log.e(tag, "get button cmd info fail");
+                }
             } else if (rev.equals("show")  && object.equals("string")) {
-                ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
-                ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
-                ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
-                Log.i(tag, "update sublistview");
-                ControlNodeActivity.updtSubListShowFlag = true;
+                if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
+                    ControlNodeActivity.tempCtlRemark.setIsusing(true);
+                    ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                    ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                    ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                    Log.i(tag, "update show sublistview");
+                    ControlNodeActivity.updtSubListShowFlag = true;
+                } else {
+                    Log.e(tag, "get show info fail");
+                }
             }
         }
     }

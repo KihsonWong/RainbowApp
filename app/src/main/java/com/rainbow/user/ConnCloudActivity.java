@@ -154,11 +154,13 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                     if (updtListFlag) {
                         updtListFlag = false;
                         Log.e(tag, "send message: update list");
-                        //1.视图添加节点
-                        mHandler.sendMessage(mHandler.
-                                obtainMessage(UPDATE_LISTVIEW, ADD_ITEM, -1, -1));
-                        //2.存储新的节点信息
-                        nodeInfoHandler(ADD_ITEM, -1);
+                        //1.存储新的节点信息
+                        int ret = nodeInfoHandler(ADD_ITEM, -1);
+                        //2.视图添加节点
+                        if (ret == 0) {
+                            mHandler.sendMessage(mHandler.
+                                    obtainMessage(UPDATE_LISTVIEW, ADD_ITEM, -1, -1));
+                        }
                     }
 
                     try {
@@ -170,9 +172,16 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         }
     }
     //存储或删除该节点信息
-    public void nodeInfoHandler(int handler, int position) {
+    public int nodeInfoHandler(int handler, int position) {
         switch (handler) {
             case ADD_ITEM:
+                for (int i=0;i<NODENUM;i++) {
+                    if (nodeInfo[i] != null)
+                    if (nodeInfo[i].getNode() == tempNewNode.getNode()) {
+                        Log.e(tag, "The node has already existed");
+                        return -1;
+                    }
+                }
                 for (int i=0;i<NODENUM;i++) {
                     if (nodeInfo[i] == null && tempNewNode.isusing) {
                         nodeInfo[i] = new NodeInfo(true);
@@ -207,6 +216,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 }
                 break;
         }
+        return 0;
     }
 
     private class MyHandler extends Handler {
