@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.Charset; //声明字符集包
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 //引用安卓的类

@@ -1,9 +1,8 @@
 package com.rainbow.user;
 
 import android.app.Activity;
-import android.view.KeyEvent;
-import android.view.View.OnClickListener;
-import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,43 +24,33 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
 public class GatewayInActivity extends Activity implements View.OnClickListener {
 
     private String tag = "GatewayInActivity";
 
-    private Thread recThread;
-    private Thread sendThread;
-
     private EditText edtSSID = null;
     private EditText edtPsd = null;
     private EditText edtConnStatus = null;
 
-    private Button btnConfirm;
-    private Button btnCancel;
-    private Button btnConnGate;
-
-    private Context mContext = null;
     private MyHandler myHandler = null;
 
     private String rainbowIP = "192.168.4.1";
     private String rainbowPort = "1013";
     private Socket mSocket = null;
-    private OutputStream outputStream = null;
-    private InputStream inputDatas = null;
+    private InputStream inputData = null;
     private PrintWriter printWriter = null;
 
     private boolean isConnected = false;
     private int tempVal = 0;
 
-    private static final int STARTRECEIVETHREAD = 1;
-    private static final int STARTSENDTHREAD = 2;
-    private static final int RETURNMESSAGETOMAINACTIVITY = 3;
-    private static final int SENDFAINMESSAGE = 4;
-    private static final int CONNECTGATEWAYSUCCESS = 5;
-    private static final int CONNECTSERVERFAIL = 6;
+    private static final int START_RECEIVE_THREAD = 1;
+    private static final int START_SEND_THREAD = 2;
+    private static final int RETURN_MESSAGE_TO_MAIN_ACTIVITY = 3;
+    private static final int SEND_MAIN_MESSAGE = 4;
+    private static final int CONNECT_GATEWAY_SUCCESS = 5;
+    private static final int CONNECT_SERVER_FAIL = 6;
 
 
 
@@ -70,8 +59,6 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.input_wifi);
         init();
-
-        mContext = this;
     }
 
     private void init() {
@@ -80,9 +67,9 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
         edtConnStatus = findViewById(R.id.hintStatusId);
         edtConnStatus.setSelection(edtConnStatus.getText().toString().length());
 
-        btnConfirm = findViewById(R.id.confirmId);
-        btnCancel = findViewById(R.id.cancelId);
-        btnConnGate = findViewById(R.id.connectGatewayId);
+        Button btnConfirm = findViewById(R.id.confirmId);
+        Button btnCancel = findViewById(R.id.cancelId);
+        Button btnConnGate = findViewById(R.id.connectGatewayId);
 
         btnConfirm.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
@@ -159,22 +146,23 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
     }
 
     private class MyHandler extends Handler {
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case STARTRECEIVETHREAD:
+                case START_RECEIVE_THREAD:
                     Log.v(tag, "receiveData Thread");
                     receiverData();
                     break;
-                case STARTSENDTHREAD:
+                case START_SEND_THREAD:
                     Log.v(tag, "sendData Thread");
                     sendData();
                     break;
-                case RETURNMESSAGETOMAINACTIVITY:
+                case RETURN_MESSAGE_TO_MAIN_ACTIVITY:
                     String result = null;
                     byte[] buffer = (byte[]) msg.obj;
                     try {
-                        result = new String(buffer, 0, msg.arg1, "UTF-8");
+                        result = new String(buffer, 0, msg.arg1, "gb2312");
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -185,15 +173,15 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
 
                     returnMainActivity();
                     break;
-                case SENDFAINMESSAGE:
+                case SEND_MAIN_MESSAGE:
                     Log.v(tag, "send fail");
                     showInfo("请正确输入");
                     break;
-                case CONNECTGATEWAYSUCCESS:
+                case CONNECT_GATEWAY_SUCCESS:
                     Log.v(tag, "connect gateway success");
                     edtConnStatus.setText("已连接");
                     break;
-                case CONNECTSERVERFAIL:
+                case CONNECT_SERVER_FAIL:
                     Log.v(tag, "connect gateway fail");
                     showInfo("连接服务器失败");
                     break;
@@ -213,18 +201,18 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
             Log.v(tag, "--->>end connect  server!");
 
             // 获取对应流通道
-            outputStream = mSocket.getOutputStream();
-            inputDatas = mSocket.getInputStream();
+            OutputStream outputStream = mSocket.getOutputStream();
+            inputData = mSocket.getInputStream();
 
             printWriter = new PrintWriter(new BufferedWriter(   //转成UTF-8编码输出
                     new OutputStreamWriter(outputStream,
                             Charset.forName("UTF-8"))));
 
-            myHandler.sendEmptyMessage(CONNECTGATEWAYSUCCESS);
-            myHandler.sendEmptyMessage(STARTRECEIVETHREAD);
-            myHandler.sendEmptyMessage(STARTSENDTHREAD);
+            myHandler.sendEmptyMessage(CONNECT_GATEWAY_SUCCESS);
+            myHandler.sendEmptyMessage(START_RECEIVE_THREAD);
+            myHandler.sendEmptyMessage(START_SEND_THREAD);
         } catch (IOException e) {
-            myHandler.sendEmptyMessage(CONNECTSERVERFAIL);
+            myHandler.sendEmptyMessage(CONNECT_SERVER_FAIL);
             Log.e(tag, "exception:" + e.toString());
         }
     }
@@ -235,13 +223,15 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
     // 接收数据线程
     private void receiverData() {
 
-        recThread = new Thread(new Runnable() {
+        //创建接收缓冲区
+        //数据读出来，并且数据的长度
+        // 线程休眠
+        Thread recThread = new Thread(new Runnable() {
             public void run() {
                 while (isConnected) {
                     if (mSocket != null && mSocket.isConnected()) {
                         try {
-                            while (inputDatas.available() == 0) {
-                            }
+                            while (inputData.available() == 0) ;
                             try {
                                 Thread.sleep(0);
                             } catch (InterruptedException e) {
@@ -249,9 +239,9 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
                             }
                             final byte[] buffer = new byte[1024];//创建接收缓冲区
                             Log.i(tag, "---->>client receive....");
-                            final int len = inputDatas.read(buffer);//数据读出来，并且数据的长度
+                            final int len = inputData.read(buffer);//数据读出来，并且数据的长度
                             myHandler.sendMessage(myHandler.
-                                    obtainMessage(RETURNMESSAGETOMAINACTIVITY, len, -1, buffer));
+                                    obtainMessage(RETURN_MESSAGE_TO_MAIN_ACTIVITY, len, -1, buffer));
                         } catch (Exception e) {
                             Log.e(tag, "--->>read failure!" + e.toString());
                         }
@@ -269,25 +259,27 @@ public class GatewayInActivity extends Activity implements View.OnClickListener 
     }
     // 数据发送
     private void sendData() {
-        sendThread = new Thread(new Runnable() {
+        // 线程休眠
+        Thread sendThread = new Thread(new Runnable() {
             public void run() {
                 while (isConnected) {
                     if (mSocket != null && mSocket.isConnected()) {
                         try {
-                            while (tempVal == 0) ;
-                            Log.v(tag, "send data...");
-                            tempVal = 0;
-                            String ssid = edtSSID.getText().toString().replaceAll(" ", "");
-                            String password = edtPsd.getText().toString().replaceAll(" ", "");
+                            if (tempVal != 0) {
+                                Log.v(tag, "send data...");
+                                tempVal = 0;
+                                String ssid = edtSSID.getText().toString().replaceAll(" ", "");
+                                String password = edtPsd.getText().toString().replaceAll(" ", "");
 
-                            if (ssid.equals("") || password.equals("")) {
-                                myHandler.sendMessage(myHandler.
-                                        obtainMessage(SENDFAINMESSAGE, -1, -1, -1));
-                            } else {
-                                String context = "ssid: " + ssid + " password: " + password + " end";
-                                printWriter.print(context);
-                                printWriter.flush();
-                                Log.i(tag, "--->> client send data!");
+                                if (ssid.equals("") || password.equals("")) {
+                                    myHandler.sendMessage(myHandler.
+                                            obtainMessage(SEND_MAIN_MESSAGE, -1, -1, -1));
+                                } else {
+                                    String context = "ssid: " + ssid + " password: " + password + " end";
+                                    printWriter.print(context);
+                                    printWriter.flush();
+                                    Log.i(tag, "--->> client send data!");
+                                }
                             }
                         } catch (Exception e) {
                             Log.e(tag, "--->> send failure!" + e.toString());

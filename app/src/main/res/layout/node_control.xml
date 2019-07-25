@@ -11,7 +11,8 @@
         android:layout_alignBaseline="@id/id_btn_command"
         android:textSize="22sp"
         android:layout_alignParentLeft="true"
-        android:text="" />
+        android:text=""
+        android:layout_alignParentStart="true" />
 
     <Button
         android:id="@+id/id_btn_command"

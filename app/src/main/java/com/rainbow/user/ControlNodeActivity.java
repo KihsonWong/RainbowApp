@@ -1,7 +1,6 @@
 package com.rainbow.user;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -26,10 +24,8 @@ import java.util.Map;
 public class ControlNodeActivity extends Activity {
     private String tag = "ControlNodeActivity";
 
-    private ListView listView;
     private List<Map<String, Object>> list;
 
-    private Button btn_cmd;
     public static CtlRemark tempCtlRemark;
     private final int  UPDATE_SUB_LISTVIEW = 0;
     public static boolean updtSubListCmdFlag = false;
@@ -47,11 +43,10 @@ public class ControlNodeActivity extends Activity {
         int i = intent.getIntExtra("index", 0);
         Log.e(tag, "string: " + i);
 
-        listView = findViewById(R.id.list);
+        ListView listView = findViewById(R.id.list);
 
         tempCtlRemark = new CtlRemark();
 
-        btn_cmd = findViewById(R.id.id_btn_command);
         //text_node = findViewById(R.id.id_txt_node);
 
         adapter = new MySimpleAdapter(this, getData(), R.layout.node_control, new String[] { "button",  "string" }, new int[] { R.id.id_btn_command, R.id.id_btn_show });
@@ -64,33 +59,32 @@ public class ControlNodeActivity extends Activity {
 
     public class CtlRemark {
 
-        private boolean isusing;
+        //private boolean isusing;
         private int node;
         private int window;
         private String content;
 
-        public int getNode() {
+        int getNode() {
             return node;
         }
 
-        public int getWindow() {
+        int getWindow() {
             return window;
         }
 
-        public String getContent() {
+        String getContent() {
             return content;
         }
 
-        public void setNode(int node) {
+        void setNode(int node) {
             this.node = node;
         }
 
-
-        public void setWindow(int window) {
+        void setWindow(int window) {
             this.window = window;
         }
 
-        public void setContent(String content) {
+        void setContent(String content) {
             this.content = content;
         }
     }
@@ -99,7 +93,7 @@ public class ControlNodeActivity extends Activity {
 
         private Handler mHandler;
 
-        public UpdateSubListThread(Handler mHandler) {
+        UpdateSubListThread(Handler mHandler) {
             this.mHandler = mHandler;
             isrunning = true;
         }
@@ -109,14 +103,12 @@ public class ControlNodeActivity extends Activity {
             while (isrunning) {
                 if (updtSubListCmdFlag)  {
                     updtSubListCmdFlag = false;
-                    Log.e(tag, "send message: update sub list" + updtSubListCmdFlag + " " + updtSubListShowFlag);
                     //1.视图添加节点
                     mHandler.sendMessage(mHandler.
                             obtainMessage(UPDATE_SUB_LISTVIEW, 0, -1, -1));
                 }
                 else if (updtSubListShowFlag){
                     updtSubListShowFlag = false;
-                    Log.e(tag, "send message: update sub list" + updtSubListCmdFlag + " " + updtSubListShowFlag);
                     //1.视图添加节点
                     mHandler.sendMessage(mHandler.
                             obtainMessage(UPDATE_SUB_LISTVIEW, 1, -1, -1));
@@ -153,9 +145,9 @@ public class ControlNodeActivity extends Activity {
 
     public class MySimpleAdapter extends SimpleAdapter {
         Context context ;
-        public MySimpleAdapter(Context context,
-                               List<? extends Map<String, ?>> data, int resource, String[] from,
-                               int[] to) {
+        MySimpleAdapter(Context context,
+                        List<? extends Map<String, ?>> data, int resource, String[] from,
+                        int[] to) {
             super(context, data, resource, from, to);
             this.context = context ;
             // TODO Auto-generated constructor stub
@@ -187,7 +179,7 @@ public class ControlNodeActivity extends Activity {
                 @Override
                 public boolean onLongClick(View v) {
                     // TODO Auto-generated method stub
-                    showInfo("长按Button"+v.getTag());
+                    showInfo("获取"+v.getTag());
                     try {
                         MainActivity.connCloudThread.pckCommandMsg(
                                 ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode(),
@@ -207,10 +199,10 @@ public class ControlNodeActivity extends Activity {
     private List<Map<String, Object>> getData() {
         //map.put(参数名字,参数值)
         //text_node.setText(ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getIdcode());
-        list = new ArrayList<Map<String, Object>>();
+        list = new ArrayList<>();
 
         for (int i=0;i<ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getShownum();i++) {
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("button", "      ");
             map.put("string", "      ");
             list.add(map);

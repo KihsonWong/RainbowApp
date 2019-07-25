@@ -1,10 +1,8 @@
 package com.rainbow.user;
 
-import android.app.Person;
+
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +18,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 public class ConnThread extends Thread {
 
@@ -28,9 +25,12 @@ public class ConnThread extends Thread {
     private Handler mhandler;
     private Socket mSocket;
     private boolean isruning;
+    private String id;
 
     private final String recMsg = "Who are you?";
-    private String sendGatewayId = "I'm client, I want to connect ";
+    private final String recMsg1 = "device doesn't find the rainbow id, close the device!";
+    private final String recMsg2 = "client device connected rainbow success!";
+    private final String sendGatewayId = "I'm client, I want to connect ";
 
     private String sendContext = null;
     private InputStream inputStream;
@@ -44,6 +44,10 @@ public class ConnThread extends Thread {
     ConnThread(Handler mhandler) {
         this.mhandler = mhandler;
         isruning = true;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     Socket getSocket() {
@@ -64,7 +68,7 @@ public class ConnThread extends Thread {
         if (mSocket == null) {
             try {
                 OutputStream outputStream;
-                Log.e(tag, "启动连接线程");
+                Log.v(tag, "启动连接线程");
                 mSocket = new Socket();
                 SocketAddress socketAddress = new InetSocketAddress(ip,  Integer.parseInt(port));
                 mSocket.connect(socketAddress, 1000);
@@ -80,14 +84,10 @@ public class ConnThread extends Thread {
                         obtainMessage(MainActivity.START_REC_THREAD, -1, -1, -1));
                 mhandler.sendMessage(mhandler.
                         obtainMessage(MainActivity.START_SEND_THREAD, -1, -1, -1));
-                mhandler.sendMessage(mhandler.
-                        obtainMessage(MainActivity.START_NEW_ACTIVITY, -1, -1,-1));
-                mhandler.sendMessage(mhandler.
-                        obtainMessage(MainActivity.SHOW_INFO_MAINACTIVITY, 1, -1,-1));
             } catch (IOException e) {
                 e.printStackTrace();
                 mhandler.sendMessage(mhandler.
-                        obtainMessage(MainActivity.SHOW_INFO_MAINACTIVITY, 0, -1, -1));
+                        obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 0, -1, -1));
             }
         }
     }
@@ -114,7 +114,7 @@ public class ConnThread extends Thread {
                             String []tempString;
                             final byte[] buffer = new byte[1024 * 10];//创建接收缓冲区
 
-                            Log.i(tag, "---->>client receive....");
+                            Log.i(tag, "client receive....");
                             final int len = inputStream.read(buffer);//数据读出来，并且数据的长度
 
                             try {
@@ -123,9 +123,21 @@ public class ConnThread extends Thread {
                                 e.printStackTrace();
                             }
                             assert recString != null;
-                            if (recString.equals(recMsg)) {
-                                sendMsg(sendGatewayId + MainActivity.edtGateId.getText().toString());
-                                continue;
+                            Log.v(tag, "msg: " + recString);
+                            switch (recString) {
+                                case recMsg:
+                                    sendMsg(sendGatewayId + id);
+                                    continue;
+                                case recMsg1:
+                                    mhandler.sendMessage(mhandler.
+                                            obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 0, -1, -1));
+                                    continue;
+                                case recMsg2:
+                                    mhandler.sendMessage(mhandler.
+                                            obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 1, -1, -1));
+                                    mhandler.sendMessage(mhandler.
+                                            obtainMessage(MainActivity.START_NEW_ACTIVITY, -1, -1, -1));
+                                    continue;
                             }
 
                             tempString = recString.split("\r\n");
@@ -144,6 +156,7 @@ public class ConnThread extends Thread {
 
                         } catch (Exception e) {
                             Log.e(tag, "--->>read failure!" + e.toString());
+
                         }
                     }
                     try {
@@ -165,21 +178,14 @@ public class ConnThread extends Thread {
                 while (isruning) {
                     if (mSocket != null && mSocket.isConnected()) {
                         try {
-                            while (sendBit == 0) ;
-                            Log.v(tag, "send data...");
-                            sendBit = 0;
-//                            String ssid = edtSSID.getText().toString().replaceAll(" ", "");
-//                            String password = edtPsd.getText().toString().replaceAll(" ", "");
-
-//                            if (ssid.equals("") || password.equals("")) {
-//                                myHandler.sendMessage(myHandler.
-//                                        obtainMessage(SENDFAINMESSAGE, -1, -1, -1));
-                            //String context = "ssid: " + ssid + " password: " + password;
-                            printWriter.print(sendContext);
-                            printWriter.flush();
-//                           }
+                            if (sendBit != 0) {
+                                Log.v(tag, "send data...");
+                                sendBit = 0;
+                                printWriter.print(sendContext);
+                                printWriter.flush();
+                            }
                         } catch (Exception e) {
-                            Log.e(tag, "--->> send failure!" + e.toString());
+                            Log.e(tag, "send failure: " + e.toString());
                         }
                     }
                     try {
@@ -272,7 +278,7 @@ public class ConnThread extends Thread {
         sendMsg(result);
     }
     //接受消息并解析执行
-    void parseMsgAndPerform(String jsonString) throws JSONException {
+    private void parseMsgAndPerform(String jsonString) throws JSONException {
 
         JSONObject jsonObject = new JSONObject(jsonString);
         //String reply = jsonObject.getString("reply");

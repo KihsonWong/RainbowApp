@@ -11,7 +11,6 @@ import android.widget.EditText;
 public class InputDialogActivity extends AppCompatActivity {
 
     private EditText edtSend;
-    private Button btnReturnSendMes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +26,7 @@ public class InputDialogActivity extends AppCompatActivity {
         edtSend.setSelection(edtSend.getText().toString().length());
 
         //返回对话框输入的数据
-        btnReturnSendMes = findViewById(R.id.id_btn_dialog_returnsendmes);
+        Button btnReturnSendMes = findViewById(R.id.id_btn_dialog_returnsendmes);
         btnReturnSendMes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -44,6 +44,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     Button btnNodeInfo;
     Button btnDeletNode;
 
+    private MyHandler mHandler = null;
     public static boolean searchKey = false;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         init();
         adapterInit();
 
+        mHandler = new MyHandler();
         UpdateListThread updateListThread = new UpdateListThread(mHandler);
         updateListThread.start();
     }
@@ -139,9 +141,9 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     class UpdateListThread extends Thread {
 
-        private Handler mHandler;
+        private MyHandler mHandler;
 
-        private UpdateListThread(Handler mHandler) {
+        private UpdateListThread(MyHandler mHandler) {
             this.mHandler = mHandler;
             isrunning = true;
         }
@@ -207,7 +209,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         }
     }
 
-    final static Handler mHandler = new Handler() {
+    private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -216,12 +218,26 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                     //Log.i(tag, "update list view: " + msg.arg1);
                     updateListView(msg.arg1, msg.arg2);
                     break;
+                case 1:
+                    break;
             }
         }
-    };
+    }
+//    final Handler mHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            switch (msg.what) {
+//                case UPDATE_LISTVIEW:
+//                    //Log.i(tag, "update list view: " + msg.arg1);
+//                    updateListView(msg.arg1, msg.arg2);
+//                    break;
+//            }
+//        }
+//    };
 
 
-    public static void updateListView(int handler, int position)  {
+    public void updateListView(int handler, int position)  {
         switch (handler) {
             case DELETE_ITEM:
 //                if (position == data.size() - 1){}
@@ -273,8 +289,30 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.id_btn_del_node:
                 Log.v(tag, "删除节点");
+                //1.发送server删除所有节点
+                try {
+                    MainActivity.connCloudThread.pckDeleteMsg(0);
+                } catch (JSONException e) {
+                    Log.e(tag, "发送删除节点信息失败");
+                    showInfo("删除节点失败");
+                    e.printStackTrace();
+                    return;
+                }
+                for (int i=data.size()-1;i>=0;i--) {
+                    //2.删除视图列表
+                    //updateListView(DELETE_ITEM, position);
+                    mHandler.sendMessage(mHandler. //由于添加是通过消息队列，因此删除也必须在通过这种方式，否则size会出错。
+                            obtainMessage(UPDATE_LISTVIEW, DELETE_ITEM, i, -1));
+                    //3.删除已存储的节点信息
+                    nodeInfoHandler(DELETE_ITEM, i);
+                }
                 break;
-            default:
+            default://just for removing warning
+                try {
+                    MainActivity.connCloudThread.pckCommandNodeInfo(1);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
         }
     }
@@ -338,55 +376,55 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         private int controlnum;
         private String idcode;
 
-        public NodeInfo(boolean isusing) {
+        NodeInfo(boolean isusing) {
             this.isusing = isusing;
         }
 
-        public void setIsusing(boolean isusing) {
+        void setIsusing(boolean isusing) {
             this.isusing = isusing;
         }
 
-        public void setNode(int node) {
+        void setNode(int node) {
             this.node = node;
         }
 
-        public void setType(int type) {
+        void setType(int type) {
             this.type = type;
         }
 
-        public void setShownum(int shownum) {
+        void setShownum(int shownum) {
             this.shownum = shownum;
         }
 
-        public void setControlnum(int controlnum) {
+        void setControlnum(int controlnum) {
             this.controlnum = controlnum;
         }
 
-        public void setIdcode(String idcode) {
+        void setIdcode(String idcode) {
             this.idcode = idcode;
         }
 
-        public boolean getIsusing() {
+        boolean getIsusing() {
             return isusing;
         }
 
-        public int getNode() {
+        int getNode() {
             return node;
         }
 
-        public int getType() {
+        int getType() {
             return type;
         }
 
-        public int getShownum() {
+        int getShownum() {
             return shownum;
         }
 
-        public int getControlnum() {
+        int getControlnum() {
             return controlnum;
         }
 
-        public String getIdcode() {
+        String getIdcode() {
             return idcode;
         }
     }
