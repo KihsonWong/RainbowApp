@@ -39,9 +39,8 @@ public class ControlNodeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lv);
 
-        Intent intent = getIntent();
-        int i = intent.getIntExtra("index", 0);
-        Log.e(tag, "string: " + i);
+//        Intent intent = getIntent();
+//        int i = intent.getIntExtra("index", 0);
 
         ListView listView = findViewById(R.id.list);
 
@@ -128,12 +127,18 @@ public class ControlNodeActivity extends Activity {
                             obtainMessage(UPDATE_SUB_LISTVIEW, 1, -1, -1));
                 }
                 try {
-                    Thread.sleep(10L); // 线程休眠
+                    Thread.sleep(100L); // 线程休眠
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        isrunning = false;
     }
 
     private Handler mHandler = new Handler() {
@@ -228,8 +233,8 @@ public class ControlNodeActivity extends Activity {
 
         for (int i=0;i<ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getShownum();i++) {
             Map<String, Object> map = new HashMap<>();
-            map.put("button", "      ");
-            map.put("string", "      ");
+            map.put("button", ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getControl(i));
+            map.put("string", ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getShow(i));
             list.add(map);
         }
 

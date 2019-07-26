@@ -54,6 +54,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         adapterInit();
 
         mHandler = new MyHandler();
+
         UpdateListThread updateListThread = new UpdateListThread(mHandler);
         updateListThread.start();
     }
@@ -71,7 +72,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     public void adapterInit() {
 
-        tempNewNode  = new NodeInfo(false);
+        tempNewNode  = new NodeInfo(false, 0);
         nodeInfo = new NodeInfo[NODENUM];
         data = new ArrayList<>();
         //找到ListView
@@ -184,7 +185,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 }
                 for (int i=0;i<NODENUM;i++) {
                     if (nodeInfo[i] == null && tempNewNode.isusing) {
-                        nodeInfo[i] = new NodeInfo(true);
+                        nodeInfo[i] = new NodeInfo(true, tempNewNode.getShownum());
                         nodeInfo[i].setNode(tempNewNode.getNode());
                         nodeInfo[i].setType(tempNewNode.getType());
                         nodeInfo[i].setControlnum(tempNewNode.getControlnum());
@@ -385,9 +386,29 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         private int shownum;
         private int controlnum;
         private String idcode;
+        private String[] show;
+        private String[] control;
 
-        NodeInfo(boolean isusing) {
+        void setShow(int index, String str) {
+            show[index] = str;
+        }
+
+        String getShow(int index) {
+            return show[index];
+        }
+
+        void setControl(int index, String str) {
+            control[index] = str;
+        }
+
+        String getControl(int index) {
+            return control[index];
+        }
+
+        NodeInfo(boolean isusing, int num) {
             this.isusing = isusing;
+            show = new String[num];
+            control = new String[num];
         }
 
         void setIsusing(boolean isusing) {

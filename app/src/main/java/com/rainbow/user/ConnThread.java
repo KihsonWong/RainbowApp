@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 
 public class ConnThread extends Thread {
 
-    private static final String tag = "ConnThread";
+    private final String tag = "ConnThread";
     private Handler mhandler;
     private Socket mSocket;
     private boolean isruning;
@@ -31,6 +31,7 @@ public class ConnThread extends Thread {
     private final String recMsg1 = "device doesn't find the rainbow id, close the device!";
     private final String recMsg2 = "client device connected rainbow success!";
     private final String sendGatewayId = "I'm client, I want to connect ";
+    private final String HEART_PACKET = "HOLD ON CONNECTING HEART";
 
     private String sendContext = null;
     private InputStream inputStream;
@@ -61,6 +62,24 @@ public class ConnThread extends Thread {
 
     void clearIsruning() {
         isruning = false;
+    }
+
+    private void holdConnServer() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                while(isruning) {
+                    sendMsg(HEART_PACKET);
+                    try {
+                        Thread.sleep(60000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
     }
 
     @Override
@@ -133,14 +152,21 @@ public class ConnThread extends Thread {
                                     mhandler.sendMessage(mhandler.
                                             obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 0, -1, -1));
                                     Log.v(tag, "msg: " + recString);
+                                    //to stop the thread
+                                    clearSocket();
+                                    clearIsruning();
                                     continue;
                                 case recMsg2:
                                     mhandler.sendMessage(mhandler.
                                             obtainMessage(MainActivity.SHOW_INFO_MAIN_ACTIVITY, 1, -1, -1));
                                     mhandler.sendMessage(mhandler.
                                             obtainMessage(MainActivity.START_NEW_ACTIVITY, -1, -1, -1));
+                                    holdConnServer();//send heart packet to server
                                     Log.v(tag, "msg: " + recString);
                                     continue;
+                                default:
+                                    Log.v(tag, "Json parse...");
+                                    break;
                             }
 
                             tempString = recString.split("\r\n");
@@ -184,7 +210,7 @@ public class ConnThread extends Thread {
                     if (mSocket != null && mSocket.isConnected()) {
                         try {
                             if (sendBit != 0) {
-                                Log.v(tag, "send data...");
+                                Log.v(tag, "send data: " + sendContext);
                                 sendBit = 0;
                                 printWriter.print(sendContext);
                                 printWriter.flush();
@@ -329,16 +355,27 @@ public class ConnThread extends Thread {
                     Log.e(tag, "add new node fail");
                 }
             } else if (rev.equals("remark")  && object.equals("control")) {
-                if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
-                    ControlNodeActivity.tempCtlRemark.setIsusing(true);
-                    ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
-                    ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
-                    ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
-                    Log.i(tag, "update cmd sublistview");
-                    ControlNodeActivity.updtSubListCmdFlag = true;
-                } else {
-                    Log.e(tag, "get button cmd info fail");
-                }
+                if (ControlNodeActivity.tempCtlRemark != null)
+                    if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
+                        ControlNodeActivity.tempCtlRemark.setIsusing(true);
+                        ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                        ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                        ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                        Log.i(tag, "update cmd sublistview");
+                        for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
+                            if (ConnCloudActivity.nodeInfo[i] != null) {
+                                if (ConnCloudActivity.nodeInfo[i].getNode() == ControlNodeActivity.tempCtlRemark.getNode()) {
+                                    ConnCloudActivity.nodeInfo[i].setShow(jsonObject.getInt("window"), jsonObject.getString("content"));
+                                    Log.v(tag, "store node control info");
+                                    break;
+                                }
+                            }
+                        }
+                        ControlNodeActivity.updtSubListCmdFlag = true;
+                    } else {
+                        Log.e(tag, "get button cmd info fail");
+                    }
+                else Log.e(tag, "error activity");
             } else if (rev.equals("show")  && object.equals("string")) {
                 if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
                     ControlNodeActivity.tempCtlRemark.setIsusing(true);
@@ -346,6 +383,15 @@ public class ConnThread extends Thread {
                     ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
                     ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
                     Log.i(tag, "update show sublistview");
+                    for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
+                        if (ConnCloudActivity.nodeInfo[i] != null) {
+                            if (ConnCloudActivity.nodeInfo[i].getNode() == ControlNodeActivity.tempCtlRemark.getNode()) {
+                                ConnCloudActivity.nodeInfo[i].setShow(jsonObject.getInt("window"), jsonObject.getString("content"));
+                                Log.v(tag, "store node show info");
+                                break;
+                            }
+                        }
+                    }
                     ControlNodeActivity.updtSubListShowFlag = true;
                 } else {
                     Log.e(tag, "get show info fail");

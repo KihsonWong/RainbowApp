@@ -6,8 +6,8 @@
 
     <TextView
         android:id="@+id/id_btn_show"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="38dp"
         android:layout_alignBaseline="@id/id_btn_command"
         android:textSize="22sp"
         android:layout_alignParentLeft="true"
@@ -16,10 +16,8 @@
 
     <Button
         android:id="@+id/id_btn_command"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:width="120dp"
-        android:height="24dp"
+        android:layout_width="120dp"
+        android:layout_height="44dp"
         android:focusable="true"
         android:clickable="true"
         android:layout_alignParentEnd="true"
