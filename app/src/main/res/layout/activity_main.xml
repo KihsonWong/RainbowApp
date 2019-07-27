@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:hint="@string/id_gateway"
+        android:text="10"
         android:layout_marginBottom="24dp"
         android:layout_above="@+id/id_btn_con_gateway"
         android:layout_centerHorizontal="true"

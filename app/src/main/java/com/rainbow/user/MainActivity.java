@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
 
             String returnId = data.getStringExtra("returnId");
 
-            edtGateId.setText(returnId);
+            edtGateId.setText("10");
         }
     }
 
@@ -147,6 +147,18 @@ public class MainActivity extends Activity {
                         connCloudThread.sendThread();
                         break;
                     case START_NEW_ACTIVITY:
+                        //avoid cannot receive network data
+//                        if (ControlNodeActivity.tempCtlRemark != null)
+//                            if (ControlNodeActivity.tempCtlRemark.getIsusing()) {
+//                                ControlNodeActivity.tempCtlRemark.setIsusing(false);
+//                                Log.e(tag, "tempCtlRemark is TRUE");
+//                            }
+//                        if (ConnCloudActivity.tempNewNode != null)
+//                            if (ConnCloudActivity.tempNewNode.getIsusing()) {
+//                                Log.e(tag, "tempNewNode is TRUE");
+//                                //ConnCloudActivity.tempNewNode.setIsusing(false);
+//                            }
+
                         Intent intent = new Intent(MainActivity.this,
                                 ConnCloudActivity.class);
                         startActivity(intent);

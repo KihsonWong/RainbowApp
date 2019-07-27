@@ -323,78 +323,112 @@ public class ConnThread extends Thread {
                 Log.v(tag, "reply OK");
             } else if (reply.equals("nodeinfo")) {
                 //
-                if (!ConnCloudActivity.tempNewNode.getIsusing()) {
-                    ConnCloudActivity.tempNewNode.setIsusing(true);
-                    ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
-                    ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
-                    ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
-                    ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
-                    ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
-
-                    Log.i(tag, "lookup nodes info");
-                    ConnCloudActivity.updtListFlag = true;
+                if (ConnCloudActivity.activity_run_flag) {
+                    if (!ConnCloudActivity.tempNewNode.getIsusing()) {
+                        ConnCloudActivity.tempNewNode.setIsusing(true);
+                        ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
+                        ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
+                        ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
+                        ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
+                        ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
+                        Log.e(tag, "idcode: " + jsonObject.getString("idcode"));
+                        Log.i(tag, "lookup nodes info");
+                        ConnCloudActivity.updtListFlag = true;
+                    } else {
+                        Log.e(tag, "add new node fail");
+                    }
                 } else {
-                    Log.e(tag, "add new node fail");
+                    Log.e(tag, "ConnCloudActivity is not active!");
                 }
             }
         } else if (jsonObject.has("class")) {
             String rev = jsonObject.getString("class");
             String object = jsonObject.getString("object");
             if (rev.equals("newnode") && object.equals("netin") && ConnCloudActivity.searchKey) {
-                if (!ConnCloudActivity.tempNewNode.getIsusing()) {
-                    ConnCloudActivity.tempNewNode.setIsusing(true);
-                    ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
-                    ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
-                    ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
-                    ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
-                    ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
+                if (ConnCloudActivity.activity_run_flag) {
+                    if (!ConnCloudActivity.tempNewNode.getIsusing()) {
+                        ConnCloudActivity.tempNewNode.setIsusing(true);
+                        ConnCloudActivity.tempNewNode.setNode(jsonObject.getInt("node"));
+                        ConnCloudActivity.tempNewNode.setType(jsonObject.getInt("type"));
+                        ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
+                        ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
+                        ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
 
-                    Log.i(tag, "add new node");
-                    ConnCloudActivity.updtListFlag = true;
-                } else {
-                    Log.e(tag, "add new node fail");
-                }
-            } else if (rev.equals("remark")  && object.equals("control")) {
-                if (ControlNodeActivity.tempCtlRemark != null)
-                    if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
-                        ControlNodeActivity.tempCtlRemark.setIsusing(true);
-                        ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
-                        ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
-                        ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
-                        Log.i(tag, "update cmd sublistview");
-                        for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
-                            if (ConnCloudActivity.nodeInfo[i] != null) {
-                                if (ConnCloudActivity.nodeInfo[i].getNode() == ControlNodeActivity.tempCtlRemark.getNode()) {
-                                    ConnCloudActivity.nodeInfo[i].setShow(jsonObject.getInt("window"), jsonObject.getString("content"));
-                                    Log.v(tag, "store node control info");
-                                    break;
-                                }
-                            }
-                        }
-                        ControlNodeActivity.updtSubListCmdFlag = true;
+                        Log.i(tag, "add new node");
+                        ConnCloudActivity.updtListFlag = true;
                     } else {
-                        Log.e(tag, "get button cmd info fail");
+                        Log.e(tag, "add new node fail");
                     }
-                else Log.e(tag, "error activity");
-            } else if (rev.equals("show")  && object.equals("string")) {
-                if (!ControlNodeActivity.tempCtlRemark.getIsusing()) {
-                    ControlNodeActivity.tempCtlRemark.setIsusing(true);
-                    ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
-                    ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
-                    ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
-                    Log.i(tag, "update show sublistview");
+                } else {
+                    Log.e(tag, "ConnCloudActivity is not active!");
+                }
+
+            } else if (rev.equals("remark")  && object.equals("control")) {
+                if (ControlNodeActivity.activity_run_flag) {
+                    if (ControlNodeActivity.tempCtlRemark != null && (ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index] != null))
+                        if (!ControlNodeActivity.tempCtlRemark.getIsusing()
+                                && (jsonObject.getInt("node") ==  ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode())) {
+                            ControlNodeActivity.tempCtlRemark.setIsusing(true);
+                            ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                            ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                            ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                            Log.i(tag, "update cmd sublistview");
+
+                            ControlNodeActivity.updtSubListCmdFlag = true;
+                        } else {
+                            Log.v(tag, "get button cmd info fail");
+                        }
+                    else {
+                        Log.e(tag, "no need update control view");
+                    }
+
                     for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
                         if (ConnCloudActivity.nodeInfo[i] != null) {
-                            if (ConnCloudActivity.nodeInfo[i].getNode() == ControlNodeActivity.tempCtlRemark.getNode()) {
+                            if (ConnCloudActivity.nodeInfo[i].getNode() == jsonObject.getInt("node")) {
+                                ConnCloudActivity.nodeInfo[i].setControl(jsonObject.getInt("window"), jsonObject.getString("content"));
+                                Log.v(tag, "store node control info");
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    if (ControlNodeActivity.tempCtlRemark.getIsusing())//avoid cannot receive network data
+                        ControlNodeActivity.tempCtlRemark.setIsusing(false);
+                    Log.e(tag, "ControlNodeActivity is not active!");
+                }
+
+            } else if (rev.equals("show")  && object.equals("string")) {
+                if (ControlNodeActivity.activity_run_flag) {
+                    if (ControlNodeActivity.tempCtlRemark != null && (ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index] != null)) {
+                        if (!ControlNodeActivity.tempCtlRemark.getIsusing()
+                                && (jsonObject.getInt("node") ==  ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode())) {
+                            ControlNodeActivity.tempCtlRemark.setIsusing(true);
+                            ControlNodeActivity.tempCtlRemark.setNode(jsonObject.getInt("node"));
+                            ControlNodeActivity.tempCtlRemark.setWindow(jsonObject.getInt("window"));
+                            ControlNodeActivity.tempCtlRemark.setContent(jsonObject.getString("content"));
+                            Log.i(tag, "update show sublistview");
+
+                            ControlNodeActivity.updtSubListShowFlag = true;
+                        } else {
+                            Log.v(tag, "get show info fail");
+                        }
+                    } else {
+                        Log.v(tag, "no need update show view");
+                    }
+
+                    for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
+                        if (ConnCloudActivity.nodeInfo[i] != null) {
+                            if (ConnCloudActivity.nodeInfo[i].getNode() == jsonObject.getInt("node")) {
                                 ConnCloudActivity.nodeInfo[i].setShow(jsonObject.getInt("window"), jsonObject.getString("content"));
                                 Log.v(tag, "store node show info");
                                 break;
                             }
                         }
                     }
-                    ControlNodeActivity.updtSubListShowFlag = true;
                 } else {
-                    Log.e(tag, "get show info fail");
+                    if (ControlNodeActivity.tempCtlRemark.getIsusing())//avoid cannot receive network data
+                        ControlNodeActivity.tempCtlRemark.setIsusing(false);
+                    Log.e(tag, "ControlNodeActivity is not active!");
                 }
             }
         }

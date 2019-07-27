@@ -23,6 +23,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
 
     private static String tag = "ConnCloudActivity";
     private static int i = 0;
+    public static boolean activity_run_flag;
 
     private static final int UPDATE_LISTVIEW = 0;
     ListView lv;// 适配器控件------->V视图
@@ -53,6 +54,8 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
         init();
         adapterInit();
 
+        activity_run_flag = true;
+
         mHandler = new MyHandler();
 
         UpdateListThread updateListThread = new UpdateListThread(mHandler);
@@ -73,6 +76,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     public void adapterInit() {
 
         tempNewNode  = new NodeInfo(false, 0);
+        Log.e(tag, "new 之后： " + tempNewNode.getIsusing());
         nodeInfo = new NodeInfo[NODENUM];
         data = new ArrayList<>();
         //找到ListView
@@ -180,20 +184,21 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                     if (nodeInfo[i] != null)
                     if (nodeInfo[i].getNode() == tempNewNode.getNode()) {
                         Log.e(tag, "The node has already existed");
+                        tempNewNode.setIsusing(false);
                         return -1;
                     }
                 }
                 for (int i=0;i<NODENUM;i++) {
-                    if (nodeInfo[i] == null && tempNewNode.isusing) {
+                    if (nodeInfo[i] == null && tempNewNode.getIsusing()) {
                         nodeInfo[i] = new NodeInfo(true, tempNewNode.getShownum());
                         nodeInfo[i].setNode(tempNewNode.getNode());
                         nodeInfo[i].setType(tempNewNode.getType());
                         nodeInfo[i].setControlnum(tempNewNode.getControlnum());
                         nodeInfo[i].setShownum(tempNewNode.getShownum());
+                        Log.e(tag, "1 idcode: " + tempNewNode.getIdcode());
                         nodeInfo[i].setIdcode(tempNewNode.getIdcode());
                         Log.i(tag, "添加节点信息成功");
 
-                        tempNewNode.setIsusing(false);
                         break;
                     }
                 }
@@ -227,7 +232,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
             switch (msg.what) {
                 case UPDATE_LISTVIEW:
                     //Log.i(tag, "update list view: " + msg.arg1);
-                    updateListView(msg.arg1, msg.arg2);
+                    if (tempNewNode.getIsusing()) {
+                        updateListView(msg.arg1, msg.arg2);
+                        tempNewNode.setIsusing(false);//must be set FALSE here, avoid UI flush error
+                    }
                     break;
                 case 1:
                     break;
@@ -258,6 +266,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 data.remove(position);
                 break;
             case ADD_ITEM:
+                Log.e(tag, "2 idcode: " + tempNewNode.getIdcode());
                 data.add(tempNewNode.getIdcode());
                 break;
         }
@@ -289,6 +298,12 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 Log.v(tag, "搜索节点按键");
                 break;
             case R.id.id_btn_nodeInfo:
+                if (ConnCloudActivity.tempNewNode != null) {
+                    Log.e(tag, "tempNewNode: "+ ConnCloudActivity.tempNewNode.getIsusing());
+                }
+                if (ControlNodeActivity.tempCtlRemark != null) {
+                    Log.e(tag, "tempCtlRemark: "+ ControlNodeActivity.tempCtlRemark.getIsusing());
+                }
                 Log.v(tag, "得到节点信息" + data.size());
                 try {
                     MainActivity.connCloudThread.pckCommandNodeInfo(-1);
@@ -336,6 +351,10 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     private void returnMainActivity() {
         MainActivity.connCloudThread.clearIsruning();
         isrunning = false;
+        activity_run_flag = false;
+        ConnCloudActivity.updtListFlag = false;
+        if (ConnCloudActivity.tempNewNode.getIsusing())
+            ConnCloudActivity.tempNewNode.setIsusing(false);//avoid cannot receive network data
 
         try {
             MainActivity.connCloudThread.getSocket().shutdownInput();

@@ -30,6 +30,7 @@ public class ControlNodeActivity extends Activity {
     private final int  UPDATE_SUB_LISTVIEW = 0;
     public static boolean updtSubListCmdFlag = false;
     public static boolean updtSubListShowFlag = false;
+    public static boolean activity_run_flag;
     private boolean isrunning = false;
     MySimpleAdapter  adapter;
     //private TextView text_node;
@@ -41,6 +42,7 @@ public class ControlNodeActivity extends Activity {
 
 //        Intent intent = getIntent();
 //        int i = intent.getIntExtra("index", 0);
+        activity_run_flag = true;
 
         ListView listView = findViewById(R.id.list);
 
@@ -138,7 +140,13 @@ public class ControlNodeActivity extends Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        activity_run_flag = false;
+        if (ControlNodeActivity.tempCtlRemark.getIsusing())//avoid cannot receive network data
+            ControlNodeActivity.tempCtlRemark.setIsusing(false);
         isrunning = false;
+
+        updtSubListCmdFlag = false;
+        updtSubListShowFlag = false;
     }
 
     private Handler mHandler = new Handler() {
@@ -148,19 +156,18 @@ public class ControlNodeActivity extends Activity {
             switch (msg.what) {
                 case UPDATE_SUB_LISTVIEW:
                     if (ControlNodeActivity.tempCtlRemark.getIsusing()) {
-                        Log.i(tag, "update list view: " + msg.arg1);
+                        //Log.i(tag, "update list view: " + msg.arg1);
                         Map<String, Object> map = list.get(tempCtlRemark.getWindow());
                         if (msg.arg1 == 0) {
                             map.put("button", tempCtlRemark.getContent());
-                            Log.i(tag, "put button");
+                            //Log.i(tag, "put button");
                         } else if (msg.arg1 == 1) {
                             if (ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index].getNode() == tempCtlRemark.getNode()) {
-                                Log.i(tag, "put string");
+                                //Log.i(tag, "put string");
                                 map.put("string", tempCtlRemark.getContent());
                             }
-                            Log.i(tag, "put string...");
+                            //Log.i(tag, "put string...");
                         }
-                        ControlNodeActivity.tempCtlRemark.setIsusing(false);
                     } else {
                         Log.e(tag, "update list view fail");
                     }
@@ -170,6 +177,7 @@ public class ControlNodeActivity extends Activity {
                     break;
             }
             adapter.notifyDataSetChanged();
+            ControlNodeActivity.tempCtlRemark.setIsusing(false);
         }
     };
 
