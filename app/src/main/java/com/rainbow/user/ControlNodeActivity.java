@@ -2,7 +2,6 @@ package com.rainbow.user;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,8 +31,8 @@ public class ControlNodeActivity extends Activity {
     public static boolean updtSubListShowFlag = false;
     public static boolean activity_run_flag;
     private boolean isrunning = false;
+
     MySimpleAdapter  adapter;
-    //private TextView text_node;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,12 +44,13 @@ public class ControlNodeActivity extends Activity {
         activity_run_flag = true;
 
         ListView listView = findViewById(R.id.list);
+        //list = new ArrayList<>();
 
         tempCtlRemark = new CtlRemark(false);
 
         //text_node = findViewById(R.id.id_txt_node);
 
-        adapter = new MySimpleAdapter(this, getData(), R.layout.node_control, new String[] { "button",  "string" }, new int[] { R.id.id_btn_command, R.id.id_btn_show });
+        adapter = new MySimpleAdapter(this, getData(), R.layout.node_control, new String[] { "button",  "string" }, new int[] { R.id.id_btn_command, R.id.id_show });
         listView.setAdapter(adapter);
         //setListAdapter(adapter);
 
@@ -190,11 +190,14 @@ public class ControlNodeActivity extends Activity {
             this.context = context ;
             // TODO Auto-generated constructor stub
         }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final int temp_pos = position;
             View view= super.getView(position, convertView, parent);
+
             Button btn_cmd = view.findViewById(R.id.id_btn_command);
+
             btn_cmd.setTag(position);
             btn_cmd.setOnClickListener(new View.OnClickListener() {
 

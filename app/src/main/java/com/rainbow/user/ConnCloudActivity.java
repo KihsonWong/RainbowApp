@@ -76,7 +76,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
     public void adapterInit() {
 
         tempNewNode  = new NodeInfo(false, 0);
-        Log.e(tag, "new 之后： " + tempNewNode.getIsusing());
+
         nodeInfo = new NodeInfo[NODENUM];
         data = new ArrayList<>();
         //找到ListView
@@ -158,7 +158,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 while (isrunning) {
                     if (updtListFlag) {
                         updtListFlag = false;
-                        Log.e(tag, "send message: update list");
+                        Log.v(tag, "send message: update list");
                         //1.存储新的节点信息
                         int ret = nodeInfoHandler(ADD_ITEM, -1);
                         //2.视图添加节点
@@ -195,7 +195,7 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                         nodeInfo[i].setType(tempNewNode.getType());
                         nodeInfo[i].setControlnum(tempNewNode.getControlnum());
                         nodeInfo[i].setShownum(tempNewNode.getShownum());
-                        Log.e(tag, "1 idcode: " + tempNewNode.getIdcode());
+                        //Log.e(tag, "1 idcode: " + tempNewNode.getIdcode());
                         nodeInfo[i].setIdcode(tempNewNode.getIdcode());
                         Log.i(tag, "添加节点信息成功");
 
@@ -266,7 +266,6 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 data.remove(position);
                 break;
             case ADD_ITEM:
-                Log.e(tag, "2 idcode: " + tempNewNode.getIdcode());
                 data.add(tempNewNode.getIdcode());
                 break;
         }
@@ -298,12 +297,6 @@ public class ConnCloudActivity extends Activity implements View.OnClickListener 
                 Log.v(tag, "搜索节点按键");
                 break;
             case R.id.id_btn_nodeInfo:
-                if (ConnCloudActivity.tempNewNode != null) {
-                    Log.e(tag, "tempNewNode: "+ ConnCloudActivity.tempNewNode.getIsusing());
-                }
-                if (ControlNodeActivity.tempCtlRemark != null) {
-                    Log.e(tag, "tempCtlRemark: "+ ControlNodeActivity.tempCtlRemark.getIsusing());
-                }
                 Log.v(tag, "得到节点信息" + data.size());
                 try {
                     MainActivity.connCloudThread.pckCommandNodeInfo(-1);

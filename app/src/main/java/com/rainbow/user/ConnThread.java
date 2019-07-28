@@ -331,7 +331,7 @@ public class ConnThread extends Thread {
                         ConnCloudActivity.tempNewNode.setShownum(jsonObject.getInt("shownum"));
                         ConnCloudActivity.tempNewNode.setControlnum(jsonObject.getInt("controlnum"));
                         ConnCloudActivity.tempNewNode.setIdcode(jsonObject.getString("idcode"));
-                        Log.e(tag, "idcode: " + jsonObject.getString("idcode"));
+
                         Log.i(tag, "lookup nodes info");
                         ConnCloudActivity.updtListFlag = true;
                     } else {
@@ -381,22 +381,22 @@ public class ConnThread extends Thread {
                     else {
                         Log.e(tag, "no need update control view");
                     }
-
-                    for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
-                        if (ConnCloudActivity.nodeInfo[i] != null) {
-                            if (ConnCloudActivity.nodeInfo[i].getNode() == jsonObject.getInt("node")) {
-                                ConnCloudActivity.nodeInfo[i].setControl(jsonObject.getInt("window"), jsonObject.getString("content"));
-                                Log.v(tag, "store node control info");
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    if (ControlNodeActivity.tempCtlRemark.getIsusing())//avoid cannot receive network data
+                } else if (ControlNodeActivity.tempCtlRemark != null){
+                    if (ControlNodeActivity.tempCtlRemark.getIsusing()) {//avoid cannot receive network data
                         ControlNodeActivity.tempCtlRemark.setIsusing(false);
-                    Log.e(tag, "ControlNodeActivity is not active!");
+                        Log.e(tag, "tempCtlRemark is true, but ControlNodeActivity is not active!");
+                    }
                 }
 
+                for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
+                    if (ConnCloudActivity.nodeInfo[i] != null) {
+                        if (ConnCloudActivity.nodeInfo[i].getNode() == jsonObject.getInt("node")) {
+                            ConnCloudActivity.nodeInfo[i].setControl(jsonObject.getInt("window"), jsonObject.getString("content"));
+                            Log.v(tag, "store node control info");
+                            break;
+                        }
+                    }
+                }
             } else if (rev.equals("show")  && object.equals("string")) {
                 if (ControlNodeActivity.activity_run_flag) {
                     if (ControlNodeActivity.tempCtlRemark != null && (ConnCloudActivity.nodeInfo[ConnCloudActivity.temp_index] != null)) {
@@ -416,19 +416,21 @@ public class ConnThread extends Thread {
                         Log.v(tag, "no need update show view");
                     }
 
-                    for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
-                        if (ConnCloudActivity.nodeInfo[i] != null) {
-                            if (ConnCloudActivity.nodeInfo[i].getNode() == jsonObject.getInt("node")) {
-                                ConnCloudActivity.nodeInfo[i].setShow(jsonObject.getInt("window"), jsonObject.getString("content"));
-                                Log.v(tag, "store node show info");
-                                break;
-                            }
+                } else if (ControlNodeActivity.tempCtlRemark != null){
+                    if (ControlNodeActivity.tempCtlRemark.getIsusing()) {//avoid cannot receive network data
+                        ControlNodeActivity.tempCtlRemark.setIsusing(false);
+                        Log.e(tag, "tempCtlRemark = true, butControlNodeActivity is not active!");
+                    }
+                }
+
+                for (int i=0;i<ConnCloudActivity.NODENUM;i++) {
+                    if (ConnCloudActivity.nodeInfo[i] != null) {
+                        if (ConnCloudActivity.nodeInfo[i].getNode() == jsonObject.getInt("node")) {
+                            ConnCloudActivity.nodeInfo[i].setShow(jsonObject.getInt("window"), jsonObject.getString("content"));
+                            Log.v(tag, "store node show info");
+                            break;
                         }
                     }
-                } else {
-                    if (ControlNodeActivity.tempCtlRemark.getIsusing())//avoid cannot receive network data
-                        ControlNodeActivity.tempCtlRemark.setIsusing(false);
-                    Log.e(tag, "ControlNodeActivity is not active!");
                 }
             }
         }
